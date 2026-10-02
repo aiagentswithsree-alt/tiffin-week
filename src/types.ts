@@ -60,6 +60,10 @@ export interface Slot {
   readyByDay: DayOffset | null;
   /** Reset whenever a week is copied forward. */
   done: boolean;
+  /** Picked dish ID from RecipeItem library (null or undefined when empty). */
+  dishId?: string | null;
+  /** Picked dish name. Displayed on filled slot; empty slot prompts "Choose a dish +". */
+  dishName?: string | null;
 }
 
 export interface Group {
@@ -161,4 +165,6 @@ export interface RecipeItem {
   nightBeforePrep?: string;
   /** "Cook extra rice for the office lunch box" — the shared-prep hint. */
   twoWaySynergy?: string;
+  base?: string | null;
+  cookMinutes?: number;
 }

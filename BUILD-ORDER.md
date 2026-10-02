@@ -65,6 +65,9 @@ Things the remap flags as must-survive and easy to lose in the merge:
 - *"travels so-so"* keys off the slot's **effective** pack mode, not a place name.
 - Dish `minutes` and `base` currently live on the slot as a stand-in. When a real
   dish is picked they come from the dish; keep the slot fields as the override.
+- **Temporary dev helper**: The `Empty / Partial / Planned` state test bar in
+  `src/screens/WeekView.tsx` is strictly behind `import.meta.env.DEV` and is
+  completely isolated from domain logic. It must be removed before Milestone 6.
 
 ## Milestone 3 — Derived outputs
 

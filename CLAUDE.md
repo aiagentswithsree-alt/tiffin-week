@@ -27,7 +27,7 @@ SLOTS. Everything derives from that. A couple deletes School. A homemaker delete
 Office. A shift worker keeps only Night shift.
 
 ```
-Week → Day → Routine → Group[] → Slot[] → (later) Dish
+Week → Day → Routine → Group[] → Slot[] → Dish
 ```
 
 Inheritance, in precedence order. `null` always means *inherit*, never *empty*:
@@ -38,6 +38,15 @@ Inheritance, in precedence order. `null` always means *inherit*, never *empty*:
 | mode | `slot.mode` → `group.mode` (`eat` \| `pack`) |
 | readyBy | `slot.readyBy` → `group.packBy` (packed) or `slot.time` (eaten here) |
 | category | `slot.category` → `"All recipes"` |
+
+### Picked-dish shape on Slot
+
+When a dish from the library (`RecipeItem`) is picked into a slot:
+- `slot.dishId`: ID of the chosen dish (`null` or `undefined` when the slot is empty).
+- `slot.dishName`: Name of the chosen dish. Empty slots render `"Choose a dish +"`; filled slots render `"<category> · Edit"`.
+- `slot.minutes`: Populated from `dish.cookMinutes` upon picking. Stays on the slot as the stove-minute override.
+- `slot.base`: Populated from `dish.base` upon picking. Stays on the slot as the shared-prep override.
+- `slot.category`: Inherits `dish.category` if slot had none set.
 
 ### Six rules that are easy to break by accident
 
