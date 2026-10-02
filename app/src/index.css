@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+/* Design tokens lifted from the 36 wireframes. Tailwind v4 turns each --color-*
+   into utilities: --color-ink-2 gives text-ink-2, border-ink-2, bg-ink-2. */
+@theme {
+  --color-stage: #A6A49E;
+  --color-bg: #F1F0EC;
+  --color-surface-2: #E7E6E1;
+  --color-line: #DDDBD4;
+  --color-line-2: #C9C6BE;
+
+  --color-ink: #1B1A17;
+  --color-ink-2: #6B675F;
+  --color-ink-3: #9C9890;
+
+  --color-green: #2E5F3E;
+  --color-green-soft: #E0EDE3;
+  --color-amber: #8F5A0F;
+  --color-amber-soft: #F6EBD9;
+  --color-red: #8B4A3C;
+  --color-red-soft: #F6DCD6;
+
+  --font-display: 'Bricolage Grotesque', Georgia, serif;
+  --font-sans: 'Instrument Sans', system-ui, -apple-system, sans-serif;
+}
+
+@layer base {
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+    background-color: var(--color-stage);
+    color: var(--color-ink);
+    -webkit-font-smoothing: antialiased;
+  }
+  #root { min-height: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}

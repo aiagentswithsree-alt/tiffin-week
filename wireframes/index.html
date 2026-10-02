@@ -1,0 +1,260 @@
+<title>Tiffin Week Screens</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: a single column of milestone sections; each is a wrapping grid of screen plates.
+   Palette is lifted from the wireframes themselves so the index reads as part of the product. */
+:root {
+  --paper:      #EDEBE5;   /* page ground — the wireframes' warm neutral, one step darker */
+  --surface:    #FFFFFF;
+  --surface-2:  #E3E1DA;
+  --line:       #D6D3CB;
+  --line-soft:  #E2DFD8;
+  --ink:        #1B1A17;
+  --ink-2:      #5F5B54;
+  --ink-3:      #8B8780;
+  --green:      #2E5F3E;   /* the wireframes' affordance colour */
+  --green-soft: #E0EDE3;
+  --amber:      #8F5A0F;
+  --shadow:     0 1px 2px rgba(27,26,23,.05);
+  --display:    'Bricolage Grotesque', Georgia, serif;
+  --body:       'Instrument Sans', system-ui, -apple-system, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper:#191814; --surface:#232119; --surface-2:#2C2A22; --line:#39362D;
+    --line-soft:#302E26; --ink:#F1EFE8; --ink-2:#B5B0A5; --ink-3:#8A857B;
+    --green:#8FC7A2; --green-soft:#24362A; --amber:#D9A45B;
+    --shadow:0 1px 2px rgba(0,0,0,.4); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper:#191814; --surface:#232119; --surface-2:#2C2A22; --line:#39362D;
+  --line-soft:#302E26; --ink:#F1EFE8; --ink-2:#B5B0A5; --ink-3:#8A857B;
+  --green:#8FC7A2; --green-soft:#24362A; --amber:#D9A45B;
+  --shadow:0 1px 2px rgba(0,0,0,.4); color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--paper); color: var(--ink);
+  font-family: var(--body); font-size: 15px; line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { padding-inline: 20px; padding-block: 44px 80px; max-width: 1240px; margin: 0 auto; }
+
+header { border-bottom: 1px solid var(--line); padding-bottom: 26px; }
+h1 {
+  font-family: var(--display); font-weight: 700; letter-spacing: -.015em;
+  font-size: clamp(30px, 5vw, 44px); margin: 0 0 10px; text-wrap: balance;
+}
+.lede { margin: 0; color: var(--ink-2); max-width: 60ch; }
+.counts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.count {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 999px;
+  padding: 5px 12px; font-size: 12.5px; color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+.count b { color: var(--ink); font-weight: 600; }
+
+section { margin-top: 46px; }
+.shead { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+h2 { font-family: var(--display); font-weight: 600; font-size: 20px; margin: 0; }
+.tag {
+  font-size: 11px; letter-spacing: .07em; text-transform: uppercase; font-weight: 600;
+  color: var(--green); background: var(--green-soft); border-radius: 999px; padding: 3px 9px;
+}
+.snote { margin: 7px 0 0; color: var(--ink-2); font-size: 14px; max-width: 70ch; }
+
+.grid {
+  display: grid; gap: 16px; margin-top: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(196px, 1fr));
+}
+.grid.wide { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+
+.plate {
+  display: flex; flex-direction: column; min-width: 0;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+  overflow: hidden; text-decoration: none; color: inherit; box-shadow: var(--shadow);
+  transition: border-color .15s ease, transform .15s ease;
+}
+.plate:hover, .plate:focus-visible { border-color: var(--ink-3); transform: translateY(-2px); }
+.plate:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+.shot {
+  background: var(--surface-2); border-bottom: 1px solid var(--line-soft);
+  height: 208px; overflow: hidden; display: flex; justify-content: center;
+}
+.grid.wide .shot { height: 140px; align-items: center; }
+.shot img { width: 100%; height: auto; max-width: 100%; display: block; }
+.grid.wide .shot img { object-fit: contain; max-height: 100%; }
+.cap { padding: 11px 13px 13px; display: flex; gap: 9px; align-items: baseline; }
+.n {
+  font-weight: 700; font-size: 12px; color: var(--green);
+  font-variant-numeric: tabular-nums; flex-shrink: 0;
+}
+.nm { font-size: 13.5px; font-weight: 500; flex: 1; min-width: 0; line-height: 1.32; }
+.dim {
+  font-size: 10.5px; color: var(--ink-3); flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.model {
+  margin-top: 20px; background: var(--surface); border: 1px solid var(--line);
+  border-radius: 12px; padding: 18px 18px 20px;
+}
+.model h3 {
+  font-family: var(--display); font-size: 15px; margin: 0 0 4px; font-weight: 600;
+}
+.model p { margin: 0 0 14px; color: var(--ink-2); font-size: 13.5px; }
+.model pre {
+  margin: 0; overflow-x: auto; background: var(--surface-2); border-radius: 8px;
+  padding: 14px; font-size: 12px; line-height: 1.6;
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace; color: var(--ink);
+}
+.rules { margin: 16px 0 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+.rules li {
+  font-size: 13.5px; color: var(--ink-2); padding-left: 14px;
+  border-left: 2px solid var(--amber);
+}
+.rules b { color: var(--ink); font-weight: 600; }
+
+footer {
+  margin-top: 52px; padding-top: 22px; border-top: 1px solid var(--line);
+  color: var(--ink-3); font-size: 13px;
+}
+@media (max-width: 420px) { .grid { grid-template-columns: 1fr 1fr; } .shot { height: 164px; } }
+@media (prefers-reduced-motion: reduce) { .plate { transition: none; } }
+</style>
+
+<div class="wrap">
+<header>
+  <h1>Tiffin Week — 36 screens</h1>
+  <p class="lede">The wireframe bundle, split one file per screen and ordered for building.
+  Every screen is standalone HTML with its real content filled in — no template loops, no
+  runtime. Click any plate to open that screen on its own.</p>
+  <div class="counts">
+    <span class="count"><b>29</b> phone screens · 390×844</span>
+    <span class="count"><b>6</b> print layouts</span>
+    <span class="count"><b>2</b> reference boards</span>
+    <span class="count"><b>8</b> milestones</span>
+  </div>
+</header>
+
+<section>
+  <div class="shead"><h2>Read first</h2><span class="tag">Reference</span></div>
+  <p class="snote">Not screens to build. One is the data model, the other is the navigation
+  spec — between them they explain why the rest of the app is shaped the way it is.</p>
+  <div class="grid wide">
+    <a class="plate" href="screens/03-app-map-day-type-places-slots.html">
+      <div class="shot"><img loading="lazy" src="previews/03-app-map-day-type-places-slots.png" alt="App map"></div>
+      <div class="cap"><span class="n">03</span><span class="nm">App map — day type, places, slots</span><span class="dim">2640×844</span></div>
+    </a>
+    <a class="plate" href="screens/36-user-flow-school-boxes.html">
+      <div class="shot"><img loading="lazy" src="previews/36-user-flow-school-boxes.png" alt="User flow"></div>
+      <div class="cap"><span class="n">36</span><span class="nm">User flow — school boxes</span><span class="dim">2270×600</span></div>
+    </a>
+  </div>
+
+  <div class="model">
+    <h3>The model those two boards describe</h3>
+    <p>Build your schema from this before writing any screen.</p>
+<pre>Week (7 days)
+└── Day
+    ├── dayType: weekday | weekend | special | festive
+    └── places[]
+        ├── School    (ticked per day)  → 1st short break ~10:30 · Lunch ~12:45 · 2nd short break ~3:00
+        ├── Office    (ticked per day)  → Breakfast box · Lunch box   (both pack by 7:15)
+        ├── Home      (always on)       → Beverage · Snack 4:30–5:00 · Dinner 6:00–6:30
+        └── Full day  (weekend/special) → Breakfast ~8:30 · Lunch ~1:00 · Snack &amp; beverage ~4:30 · Dinner ~7:30
+
+Slot  → opensOnCategory, pick → Dish
+Dish  → name, note, cookMinutes, category, base?, ingredients[]{ name, qty, est, shopSection }
+
+picks → Shopping list → Prep plan → Print centre</pre>
+    <ul class="rules">
+      <li><b>base is the join key.</b> Two slots picking dishes with the same base
+      ("one pot of rice") produce the <i>Made once, split two ways</i> panel and collapse
+      the night-before list to one task. Screens 08, 12 and 17 all rest on this.</li>
+      <li><b>Times run backwards from a deadline.</b> "Out by 7:15 · 33 min of stove ·
+      start by 6:42 AM" is deadline minus the sum of cook minutes. Same mechanic drives
+      the evening timelines on 17 and 20.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <div class="shead"><h2>Milestone 1 — Week shell and day types</h2></div>
+  <p class="snote">The frame every other screen sits in: header, week navigation, day pills,
+  and the decision that classifies a day.</p>
+  <div class="grid" data-set="01,02,21"></div>
+</section>
+
+<section>
+  <div class="shead"><h2>Milestone 2 — School flow</h2><span class="tag">Core loop</span></div>
+  <p class="snote">Build this end to end before anything else. Office, Home and Full day are
+  the same machine pointed at different slots. Screen 07 adds the expanded recipe state;
+  screen 08 is where the app earns its keep.</p>
+  <div class="grid" data-set="04,05,06,07,08"></div>
+</section>
+
+<section>
+  <div class="shead"><h2>Milestone 3 — Office flow</h2></div>
+  <p class="snote">Same picker, two slots. Note the dashed <i>FRI 2?</i> pill — office days
+  that vary week to week, confirmed by a Thursday-night nudge set in Settings.</p>
+  <div class="grid" data-set="09,10,11,12"></div>
+</section>
+
+<section>
+  <div class="shead"><h2>Milestone 4 — Home evening</h2></div>
+  <p class="snote">Home needs no tick; it runs every day. Screen 16 introduces the serves
+  stepper, 17 the computed evening timeline.</p>
+  <div class="grid" data-set="13,14,15,16,17"></div>
+</section>
+
+<section>
+  <div class="shead"><h2>Milestone 5 — Full day at Home</h2></div>
+  <p class="snote">Weekend, special and festive days. 18 is the half-planned state worth
+  building carefully; 19 is the picker variant for swapping a dish already in a slot.</p>
+  <div class="grid" data-set="18,19,20"></div>
+</section>
+
+<section>
+  <div class="shead"><h2>Milestone 6 — Derived outputs</h2><span class="tag">Computed</span></div>
+  <p class="snote">Nothing here is hand-entered — it all falls out of the picks. Good place
+  for tests: quantities, pantry exclusions, lead times.</p>
+  <div class="grid" data-set="22,23,24,25"></div>
+</section>
+
+<section>
+  <div class="shead"><h2>Milestone 7 — Editing and setup</h2></div>
+  <p class="snote">The recipe editor feeds everything upstream: amounts rescale with serves,
+  and linking a base is what puts a task on the prep plan.</p>
+  <div class="grid" data-set="26,27,28"></div>
+</section>
+
+<section>
+  <div class="shead"><h2>Milestone 8 — Print</h2></div>
+  <p class="snote">Fixed paper sizes, exported as a PDF and shared or printed. Build these
+  with real page dimensions and a print stylesheet.</p>
+  <div class="grid" data-set="29,30,31,32,33,34,35"></div>
+</section>
+
+<footer>
+  Split from Tiffin Week — App Wireframes. Screens in <code>screens/</code>, previews in
+  <code>previews/</code>, full build notes in BUILD-ORDER.md.
+</footer>
+</div>
+
+<script>
+const SCREENS = {"01": ["01-day-type", "Day type", 390, 844], "02": ["02-weekday-school-office-home", "Weekday \u2014 School, Office, Home", 390, 844], "03": ["03-app-map-day-type-places-slots", "App map \u2014 day type, places, slots", 2640, 844], "04": ["04-tick-school-three-boxes", "Tick School \u2014 three boxes", 390, 844], "05": ["05-picker-1st-short-break", "Picker \u2014 1st short break", 390, 844], "06": ["06-picker-lunch", "Picker \u2014 Lunch", 390, 844], "07": ["07-picker-2nd-short-break", "Picker \u2014 2nd short break", 390, 844], "08": ["08-school-day-planned", "School day planned", 390, 844], "09": ["09-tick-office-two-boxes", "Tick Office \u2014 two boxes", 390, 844], "10": ["10-picker-office-breakfast-box", "Picker \u2014 Office breakfast box", 390, 844], "11": ["11-picker-office-lunch-box", "Picker \u2014 Office lunch box", 390, 844], "12": ["12-office-day-planned", "Office day planned", 390, 844], "13": ["13-home-beverage-snack-dinner", "Home \u2014 beverage, snack, dinner", 390, 844], "14": ["14-picker-beverage", "Picker \u2014 Beverage", 390, 844], "15": ["15-picker-home-snack", "Picker \u2014 Home snack", 390, 844], "16": ["16-picker-home-dinner", "Picker \u2014 Home dinner", 390, 844], "17": ["17-home-evening-planned", "Home evening planned", 390, 844], "18": ["18-full-day-at-home-half-planned", "Full day at Home \u2014 half planned", 390, 844], "19": ["19-picker-editing-a-saved-slot", "Picker \u2014 editing a saved slot", 390, 844], "20": ["20-full-day-at-home-planned", "Full day at Home \u2014 planned", 390, 844], "21": ["21-week-at-a-glance", "Week at a glance", 390, 844], "22": ["22-shopping-list-for-the-week", "Shopping list for the week", 390, 844], "23": ["23-pantry-always-in-stock", "Pantry \u2014 always in stock", 390, 844], "24": ["24-prep-plan-for-the-week", "Prep plan for the week", 390, 844], "25": ["25-bases-preps-library", "Bases & preps library", 390, 844], "26": ["26-recipe-editor-amounts-and-bases", "Recipe editor \u2014 amounts and bases", 390, 844], "27": ["27-settings-household-and-timings", "Settings \u2014 household and timings", 390, 844], "28": ["28-start-next-week", "Start next week", 390, 844], "29": ["29-print-centre", "Print centre", 390, 844], "30": ["30-print-weekly-wall-planner-a4-landscape", "Print \u2014 weekly wall planner (A4 landscape)", 1123, 794], "31": ["31-print-prep-sheet-a4-portrait", "Print \u2014 prep sheet (A4 portrait)", 794, 1123], "32": ["32-print-shopping-list-a4-portrait", "Print \u2014 shopping list (A4 portrait)", 794, 1123], "33": ["33-print-daily-fridge-card-a5", "Print \u2014 daily fridge card (A5)", 559, 794], "34": ["34-print-blank-weekly-planner-a4-landscape", "Print \u2014 blank weekly planner (A4 landscape)", 1123, 794], "35": ["35-print-recipe-card-a5", "Print \u2014 recipe card (A5)", 559, 794], "36": ["36-user-flow-school-boxes", "User flow \u2014 school boxes", 2270, 600]};
+for (const grid of document.querySelectorAll('.grid[data-set]')) {
+  grid.innerHTML = grid.dataset.set.split(',').map(n => {
+    const [file, title, w, h] = SCREENS[n];
+    const esc = title.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+    return `<a class="plate" href="screens/${file}.html">
+      <div class="shot"><img loading="lazy" src="previews/${file}.png" alt="${esc}"></div>
+      <div class="cap"><span class="n">${n}</span><span class="nm">${esc}</span><span class="dim">${w}×${h}</span></div>
+    </a>`;
+  }).join('');
+}
+</script>

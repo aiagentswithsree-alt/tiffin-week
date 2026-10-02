@@ -1,0 +1,52 @@
+Tiffin Week — routine setup v5
+Test run: 2 Oct 2026, Chromium (Playwright). 16 checks across 3 suites.
+
+SUITE 1 — original acceptance checks
+
+================ ACCEPTANCE CHECKS ================
+PASS  1 Mixed group — different deadlines resolve
+      breakfast eat/ready 07:30 · snack pack/ready 07:15
+PASS  2 Live inheritance — updates, overrides persist, Reset restores
+      placeholder 3→4 · override kept 5 · label "inherited"→"set for this group" · reset→null
+PASS  3 Conflicts — 3 weekly + 2 dated, Save lands on an actionable conflict
+      Mon claimed by 3→0 left · dated conflicts 1 · after Save: routines view true, 1 warning(s), 1 action(s), "Showing the 2026-10-02 conflict — resolve it to save."
+PASS  4 Servings — rejects 0 / negative / fractional, stores numbers
+      0→null · -2→null · 2.5→null · 4→4 (number) · saved 4 (number)
+PASS  5 Overnight — independent day offsets give a positive lead time
+      lunch 00:30 next day, packed 17:30 same day → lead 420 min (7 h); dinner lead 90 min · UI: "Eaten 00:30 (next day), packed by 17:30 — 7 h ahead."
+PASS  6 Day instances — one Wednesday edited, template and other Wednesdays untouched
+      template "Breakfast" · Wed 23 instance "Upma for Wednesday only" · instances ["2026-09-23"] · Wed 2026-09-30 → "Breakfast", instance=false
+
+6/6 passed · page errors: none
+
+SUITE 2 — unassigned days and attendance
+
+========== ADDITIONAL CHECKS ==========
+PASS  7 Unassigned day — offers a routine or a scratch day, and acts
+      options ["Regular","Weekend","Create this day from scratch"] → instance {"groups":1,"routineId":null}
+PASS  8 Tentative — attendance and shopping move independently
+      confirmed "Shopping: 12 servings." → tentative tentative/true "Shopping: 12 servings (includes 12 tentative)." → unshopped tentative/false "Shopping: 0 servings." → skipped "Shopping: 0 servings."
+PASS  9 Lead text has no double space
+      checked in test 5 output below
+
+3/3 · page errors: none
+
+SUITE 3 — sequential cooking, shared prep, copy week
+
+===== DECISION CHECKS (sequential cooking · shared prep · copy week) =====
+PASS  A Sequential cross-group cook order reproduces 6:23
+      tasks ["06:23 Temper lemon rice 5m","06:28 Tomato rice + paneer 12m","06:40 Idli 15m","06:55 Steamed chickpea dessert 20m"] · total 52 min · start 06:23 (original printed 6:42)
+PASS  B Shared prep cooked once, batch combined
+      rice 12 min for 6 servings covering 2 meals · naive 60 → merged 48
+PASS  C Weekday-specific attendance default
+      Mon confirmed/shop · Wed confirmed/shop · Fri tentative/noshop
+PASS  D Buying for tentative never schedules it to cook
+      shopping "Shopping: 12 servings." → "Shopping: 18 servings (includes 6 tentative)." · group tentative/true · cook order unchanged: true
+PASS  E Copy week — plans copied, done marks reset, templates untouched
+      source done true → copy done false · copied name "Idli for Monday" · template still "1st short break" · instances 8
+PASS  F Copy asks before replacing destination days
+      prompt "7 days in the destination week already have plans. Replace them?" · replace button 1
+PASS  G Overnight offsets preserved across the copy
+      copied slot 00:30 timeDay=1 readyByDay=null
+
+7/7 · page errors: none
