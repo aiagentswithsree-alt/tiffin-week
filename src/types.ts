@@ -167,4 +167,7 @@ export interface RecipeItem {
   twoWaySynergy?: string;
   base?: string | null;
   cookMinutes?: number;
+  note?: string;
+  /** Warning badge shown only when slot's effective mode is 'pack'. */
+  travelsSoSo?: boolean;
 }

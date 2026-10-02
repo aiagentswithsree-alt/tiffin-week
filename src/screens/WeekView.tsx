@@ -7,8 +7,8 @@ import { cookPlan, dayTotals } from '../lib/schedule';
 import { SAMPLE_RECIPES } from '../data/recipes';
 import { useWeekStore } from '../store/useWeekStore';
 import { Banner, Button, Field, Hint, Label, Segmented } from '../components/ui';
+import DishPicker from './DishPicker';
 import type { Attendance, RecipeItem, Slot, SlotCategory } from '../types';
-import { ALL_CATEGORIES } from '../types';
 
 /** N3 — the week, and a single day resolved from its routine or its own instance. */
 export default function WeekView() {
@@ -102,7 +102,6 @@ const DayPlan: React.FC<{ date: Date; onBack: () => void }> = ({ date: d, onBack
 
   // Active slot being edited or picked into
   const [activeSlot, setActiveSlot] = useState<{ gi: number; si: number } | null>(null);
-  const [pickerCategory, setPickerCategory] = useState<string>('All');
 
   // Writes strictly to this day instance via materialise
   const onDay = (fn: (groups: import('../types').Group[]) => void, msg?: string) =>
@@ -420,11 +419,8 @@ const DayPlan: React.FC<{ date: Date; onBack: () => void }> = ({ date: d, onBack
                                 <div className="mt-1 flex flex-wrap items-center gap-2">
                                   <button
                                     type="button"
-                                    onClick={() => {
-                                      setPickerCategory(s.category ?? 'All');
-                                      setActiveSlot({ gi, si });
-                                    }}
-                                    className="text-[11.5px] font-medium text-ink-2 underline decoration-dotted hover:text-ink"
+                                    onClick={() => setActiveSlot({ gi, si })}
+                                    className="text-[11.5px] font-medium text-ink-2 underline decoration-dotted hover:text-ink cursor-pointer"
                                   >
                                     {categoryOf(s)} · Edit
                                   </button>
@@ -453,10 +449,7 @@ const DayPlan: React.FC<{ date: Date; onBack: () => void }> = ({ date: d, onBack
                         ) : (
                           <button
                             type="button"
-                            onClick={() => {
-                              setPickerCategory(s.category ?? 'All');
-                              setActiveSlot({ gi, si });
-                            }}
+                            onClick={() => setActiveSlot({ gi, si })}
                             className="mt-1.5 flex w-full items-center justify-between rounded-xl border border-dashed border-line-2 bg-[#FAF9F6] p-2.5 text-left hover:border-ink cursor-pointer"
                           >
                             <div>
@@ -491,7 +484,6 @@ const DayPlan: React.FC<{ date: Date; onBack: () => void }> = ({ date: d, onBack
                   if ((plan.groups[gi].status ?? 'confirmed') !== 'confirmed') continue;
                   const si = plan.groups[gi].slots.findIndex((s) => !s.dishId && !s.dishName);
                   if (si !== -1) {
-                    setPickerCategory(plan.groups[gi].slots[si].category ?? 'All');
                     setActiveSlot({ gi, si });
                     break;
                   }
@@ -594,148 +586,22 @@ const DayPlan: React.FC<{ date: Date; onBack: () => void }> = ({ date: d, onBack
         </>
       )}
 
-      {/* Lightweight Placeholder Dish Picker Dialog for N4 testing */}
-      {activeSlot && plan.groups[activeSlot.gi]?.slots[activeSlot.si] && (() => {
-        const slot = plan.groups[activeSlot.gi].slots[activeSlot.si];
-        const group = plan.groups[activeSlot.gi];
-        const matchingDishes = SAMPLE_RECIPES.filter(
-          (r) => pickerCategory === 'All' || r.category === pickerCategory,
-        );
-
-        return (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-            <div className="flex max-h-[85vh] w-full max-w-[360px] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
-              <div className="border-b border-line px-4 py-3">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-display text-[16px] font-bold text-ink">
-                    Pick a dish
-                  </h3>
-                  <button
-                    type="button"
-                    onClick={() => setActiveSlot(null)}
-                    className="grid h-7 w-7 place-items-center rounded-lg text-ink-2 hover:bg-surface-2"
-                  >
-                    ✕
-                  </button>
-                </div>
-                <div className="mt-0.5 text-xs text-ink-2">
-                  {group.name} · {slot.name} (~{slot.time})
-                </div>
-
-                {/* Quick actions for testing N4 */}
-                <div className="mt-2.5 flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const match = SAMPLE_RECIPES.find((r) => r.category === slot.category) ?? SAMPLE_RECIPES[0];
-                      handlePickDish(activeSlot.gi, activeSlot.si, match);
-                    }}
-                    className="flex-1 rounded-lg bg-green px-2.5 py-1.5 text-center text-xs font-semibold text-white hover:bg-green/90"
-                  >
-                    ⚡ Quick fill placeholder
-                  </button>
-                  {(slot.dishId || slot.dishName) && (
-                    <button
-                      type="button"
-                      onClick={() => handleClearDish(activeSlot.gi, activeSlot.si)}
-                      className="rounded-lg border border-line-2 px-2.5 py-1.5 text-xs font-medium text-red hover:bg-red-soft"
-                    >
-                      Clear dish
-                    </button>
-                  )}
-                </div>
-
-                {/* Slot field overrides for minutes and base */}
-                <div className="mt-2 flex items-center gap-2 border-t border-dashed border-line pt-2 text-xs">
-                  <span className="text-ink-2 font-medium">Overrides:</span>
-                  <input
-                    type="number"
-                    min={0}
-                    value={slot.minutes}
-                    onChange={(e) => onDay((groups) => {
-                      groups[activeSlot.gi].slots[activeSlot.si].minutes = Number(e.target.value) || 0;
-                    })}
-                    placeholder="Mins"
-                    className="w-14 rounded border border-line px-1.5 py-0.5 text-xs text-center"
-                    title="Stove minutes override"
-                  />
-                  <span className="text-ink-3">min</span>
-                  <input
-                    type="text"
-                    value={slot.base ?? ''}
-                    onChange={(e) => onDay((groups) => {
-                      groups[activeSlot.gi].slots[activeSlot.si].base = e.target.value.trim() || null;
-                    })}
-                    placeholder="Base key"
-                    className="flex-1 rounded border border-line px-1.5 py-0.5 text-xs"
-                    title="Shared prep base override"
-                  />
-                </div>
-              </div>
-
-              {/* Category selector */}
-              <div className="flex overflow-x-auto border-b border-line bg-surface-2 px-2 py-1.5 text-xs">
-                <button
-                  type="button"
-                  onClick={() => setPickerCategory('All')}
-                  className={`rounded-full px-2.5 py-1 font-medium whitespace-nowrap mr-1 ${pickerCategory === 'All' ? 'bg-ink text-white' : 'text-ink-2 hover:text-ink'}`}
-                >
-                  All
-                </button>
-                {ALL_CATEGORIES.map((cat) => (
-                  <button
-                    key={cat}
-                    type="button"
-                    onClick={() => setPickerCategory(cat)}
-                    className={`rounded-full px-2.5 py-1 font-medium whitespace-nowrap mr-1 ${pickerCategory === cat ? 'bg-ink text-white' : 'text-ink-2 hover:text-ink'}`}
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
-
-              {/* Recipe List */}
-              <div className="flex-1 overflow-y-auto p-3 space-y-2">
-                {matchingDishes.map((r) => {
-                  const isCurrent = slot.dishId === r.id;
-                  return (
-                    <button
-                      key={r.id}
-                      type="button"
-                      onClick={() => handlePickDish(activeSlot.gi, activeSlot.si, r)}
-                      className={`flex w-full flex-col items-start rounded-xl border p-2.5 text-left transition-all ${isCurrent ? 'border-green bg-green-soft' : 'border-line bg-white hover:border-ink-2'}`}
-                    >
-                      <div className="flex w-full items-baseline justify-between">
-                        <span className="font-display text-[13.5px] font-bold text-ink">
-                          {r.name}
-                        </span>
-                        <span className="text-[11px] text-ink-2">
-                          {r.cookTime}
-                        </span>
-                      </div>
-                      <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[10px]">
-                        <span className="rounded bg-surface-2 px-1.5 py-0.5 text-ink-2 font-medium">
-                          {r.category}
-                        </span>
-                        {r.base && (
-                          <span className="rounded bg-green-soft px-1.5 py-0.5 text-green font-semibold">
-                            {r.base}
-                          </span>
-                        )}
-                        {r.twoWaySynergy && (
-                          <span className="rounded bg-amber-soft px-1.5 py-0.5 text-amber font-medium">
-                            2-way
-                          </span>
-                        )}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        );
-      })()}
+      {/* N5 Real Dish Picker Bottom Sheet */}
+      {activeSlot && plan.groups[activeSlot.gi]?.slots[activeSlot.si] && (
+        <DishPicker
+          group={plan.groups[activeSlot.gi]}
+          slot={plan.groups[activeSlot.gi].slots[activeSlot.si]}
+          household={state.household}
+          onPick={(recipe) => handlePickDish(activeSlot.gi, activeSlot.si, recipe)}
+          onClear={() => handleClearDish(activeSlot.gi, activeSlot.si)}
+          onUpdateServes={(n) => {
+            onDay((groups) => {
+              groups[activeSlot.gi].slots[activeSlot.si].serves = n;
+            }, 'Servings updated');
+          }}
+          onClose={() => setActiveSlot(null)}
+        />
+      )}
     </div>
   );
 };

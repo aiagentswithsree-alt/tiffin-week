@@ -19,8 +19,8 @@ visual reference — they are not being redrawn.
 
 | | |
 |---|---|
-| **Done** | N1 Onboarding · N2 Routine setup · N3 Week view + day plan |
-| **Next** | N4 Day plan slot filling · N5 Dish picker |
+| **Done** | N1 Onboarding · N2 Routine setup · N3 Week view + day plan · N4 Day plan slot filling · N5 Dish picker |
+| **Next** | N6 Shopping list · N8 Prep plan (Milestone 3) |
 | Verified | typecheck + build clean; 5 end-to-end checks pass; logic covered by 16 checks in the v5 wireframe |
 
 Milestone 1 landed as a **port** of `routine-setup-v5.html`, not a fresh design.
@@ -46,7 +46,7 @@ conflict on save; day instances that leave templates alone; copy-week-forward
 that resets done marks and asks before replacing; sequential cross-group cook
 scheduling with shared prep merged.
 
-## Milestone 2 — The core loop
+## Milestone 2 — The core loop ✅
 
 | Surface | Absorbs | Notes |
 |---|---|---|
