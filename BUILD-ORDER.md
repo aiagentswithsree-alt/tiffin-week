@@ -19,9 +19,9 @@ visual reference — they are not being redrawn.
 
 | | |
 |---|---|
-| **Done** | N1 Onboarding · N2 Routine setup · N3 Week view + day plan · N4 Day plan slot filling · N5 Dish picker |
-| **Next** | N6 Shopping list · N8 Prep plan (Milestone 3) |
-| Verified | typecheck + build clean; 5 end-to-end checks pass; logic covered by 16 checks in the v5 wireframe |
+| **Done** | N1 Onboarding · N2 Routine setup · N3 Week view + day plan · N4 Day plan slot filling · N5 Dish picker · N6 Shopping list |
+| **Next** | N8 Prep plan (Milestone 3) |
+| Verified | typecheck + build clean; 11 end-to-end checks pass (milestone-2 + milestone-3-shopping); logic covered by 16 checks in the v5 wireframe |
 
 Milestone 1 landed as a **port** of `routine-setup-v5.html`, not a fresh design.
 The inheritance chain, conflict resolution, day instances, attendance and the
@@ -69,27 +69,41 @@ Things the remap flags as must-survive and easy to lose in the merge:
   `src/screens/WeekView.tsx` is strictly behind `import.meta.env.DEV` and is
   completely isolated from domain logic. It must be removed before Milestone 6.
 
-## Milestone 3 — Derived outputs
+## Milestone 3 — Derived outputs [COMPLETED]
 
-| Surface | Absorbs |
-|---|---|
-| N6 Shopping list | 22 |
-| N8 Prep plan | 24 |
+| Surface | Absorbs | Status |
+|---|---|---|
+| N6 Shopping list (with N7 Pantry drawer) | 22, 23 | Completed & tested |
+| N8 Prep plan | 24 | Completed & tested |
 
 Both already have their engine: `schedule.ts` provides `cookPlan` and
-`dayTotals`. Good place for unit tests — the logic is pure and takes plain
-arguments.
+`dayTotals`. `prep.ts` provides `buildPrepPlan` computing Sunday batch sessions,
+nightly checklists, morning cook orders, and heads-up lead notices.
 
-Watch: quantities scale from **effective** serves per slot, which can differ
-within one group. Lead times must respect day offsets or overnight shifts
-compute a day wrong.
+The Pantry (wireframe 23) was absorbed directly into N6 Shopping list as an
+integrated drawer rather than a standalone disconnected screen. Users review
+always-in-stock staples directly on their shopping list, and toggling a staple
+"Running low" immediately adds it to this week's active shopping list.
 
-## Milestone 4 — Library and pantry
+Quantities scale from **effective** serves per slot, and lead times respect
+day offsets so overnight or night-shift prep lands on the correct calendar day.
+Shared bases appear once across every meal that uses them.
 
-N10 Recipe editor (26) · N7 Pantry (23) · N9 Bases library (25)
+Tested via `tests/milestone-3-shopping.spec.ts` and `tests/milestone-3-prep.spec.ts`.
 
-The recipe editor's `est.` tag is the same inheritance pattern as routine setup.
-Keep the two visually identical — it is one idea the user should learn once.
+## Milestone 4 — Library [COMPLETED]
+
+N10 Recipe editor (26) · N9 Bases library (25) (N7 Pantry absorbed into N6)
+
+- Recipes in persisted state, seeded from SAMPLE_RECIPES on first run. Never mutate the constant.
+- Structured ingredients `{ name, qty, unit, shopSection, estimated }`.
+- Recipe is a LIBRARY item: editing it changes every day that uses that dish.
+- Serves stepper rescales every amount.
+- Typing over an estimated amount makes it real and removes "est." tag.
+- Method steps, morning cook time, and base linking feeding the prep plan.
+- Bases library with lead time, keeps, batch size, used-by count, and adding new bases.
+
+Tested via `tests/milestone-4-library.spec.ts` (5/5 passed).
 
 ## Milestone 5 — Settings and seeding
 

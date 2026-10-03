@@ -91,6 +91,9 @@ export const ONBOARDING = [
   { key: 'Night shift', title: 'Shift work', detail: 'Meals timed around a shift, crossing midnight.' },
 ] as const;
 
+import { SAMPLE_RECIPES } from '../data/recipes';
+import { DEFAULT_BASES } from '../data/bases';
+
 export const seedState = (keys: string[], household = 3): AppState => {
   const weekday = makeRoutine('Regular', [0, 1, 2, 3, 4]);
   keys.filter((k) => k !== 'Home').forEach((k) => weekday.groups.push(makeGroup(k)));
@@ -98,7 +101,19 @@ export const seedState = (keys: string[], household = 3): AppState => {
 
   const weekend = makeRoutine('Weekend', [5, 6], [makeGroup('Home', 'Full day at home')]);
 
-  return { household, routines: [weekday, weekend], dayInstances: {} };
+  return {
+    household,
+    routines: [weekday, weekend],
+    dayInstances: {},
+    recipes: structuredClone(SAMPLE_RECIPES),
+    bases: structuredClone(DEFAULT_BASES),
+  };
 };
 
-export const emptyState = (): AppState => ({ household: 3, routines: [], dayInstances: {} });
+export const emptyState = (): AppState => ({
+  household: 3,
+  routines: [],
+  dayInstances: {},
+  recipes: structuredClone(SAMPLE_RECIPES),
+  bases: structuredClone(DEFAULT_BASES),
+});

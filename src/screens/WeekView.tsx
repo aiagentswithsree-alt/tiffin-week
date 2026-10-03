@@ -89,6 +89,26 @@ export default function WeekView() {
           {preview.planned === 0 && <Hint>Nothing planned in this week to copy.</Hint>}
         </Banner>
       )}
+
+      {/* Wireframe 21 Bottom Action Bar */}
+      <div className="mt-4 grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          onClick={() => nav('/shopping')}
+          className="flex flex-col gap-1 rounded-xl bg-ink p-3 text-left text-white hover:bg-ink/90 cursor-pointer shadow-xs"
+        >
+          <span className="font-display text-[16px] font-bold">Shopping list →</span>
+          <span className="text-[11px] opacity-80">Buy Sunday & Fresh midweek</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => nav('/prep')}
+          className="flex flex-col gap-1 rounded-xl border border-line-2 bg-white p-3 text-left text-ink hover:bg-surface-2 cursor-pointer shadow-xs"
+        >
+          <span className="font-display text-[16px] font-bold">Prep plan →</span>
+          <span className="text-[11px] text-ink-2">Sunday batch & nightly</span>
+        </button>
+      </div>
     </div>
   );
 }
@@ -96,9 +116,11 @@ export default function WeekView() {
 /** N4 — Day plan with progressive slot filling (empty → partial → planned). */
 const DayPlan: React.FC<{ date: Date; onBack: () => void }> = ({ date: d, onBack }) => {
   const { state, update } = useWeekStore();
+  const nav = useNavigate();
   const key = iso(d);
   const plan = resolveDay(state, d);
   const totals = dayTotals(plan.groups, state.household);
+  const recipes = state.recipes && state.recipes.length > 0 ? state.recipes : SAMPLE_RECIPES;
 
   // Active slot being edited or picked into
   const [activeSlot, setActiveSlot] = useState<{ gi: number; si: number } | null>(null);
@@ -142,7 +164,7 @@ const DayPlan: React.FC<{ date: Date; onBack: () => void }> = ({ date: d, onBack
   for (const g of confirmedGroups) {
     for (const s of g.slots) {
       if (!s.dishId && !s.dishName) continue;
-      const rec = SAMPLE_RECIPES.find((r) => r.id === s.dishId || r.name === s.dishName);
+      const rec = recipes.find((r) => r.id === s.dishId || r.name === s.dishName);
       if (rec?.nightBeforePrep) {
         nightTasks.push({ task: rec.nightBeforePrep, forMeal: `${g.name} · ${s.name}` });
       } else if (s.base && !handledBases.has(s.base)) {
@@ -188,7 +210,7 @@ const DayPlan: React.FC<{ date: Date; onBack: () => void }> = ({ date: d, onBack
       for (let si = 0; si < plan.groups[gi].slots.length; si++) {
         const s = plan.groups[gi].slots[si];
         if (!s.dishId && !s.dishName) {
-          const match = SAMPLE_RECIPES.find((r) => r.category === s.category) ?? SAMPLE_RECIPES[0];
+          const match = recipes.find((r) => r.category === s.category) ?? recipes[0];
           handlePickDish(gi, si, match);
           return;
         }
@@ -203,7 +225,7 @@ const DayPlan: React.FC<{ date: Date; onBack: () => void }> = ({ date: d, onBack
         if ((g.status ?? 'confirmed') !== 'confirmed') continue;
         for (const s of g.slots) {
           if (!s.dishId && !s.dishName) {
-            const match = SAMPLE_RECIPES.find((r) => r.category === s.category) ?? SAMPLE_RECIPES[idx % SAMPLE_RECIPES.length];
+            const match = recipes.find((r) => r.category === s.category) ?? recipes[idx % recipes.length];
             s.dishId = match.id;
             s.dishName = match.name;
             s.category = match.category;
@@ -572,16 +594,23 @@ const DayPlan: React.FC<{ date: Date; onBack: () => void }> = ({ date: d, onBack
 
           {/* Shopping Servings summary banner */}
           <Banner>
-            <div>
-              Shopping: {totals.shopping} servings
-              {totals.tentativeShopped ? ` (includes ${totals.tentativeShopped} tentative)` : ''}.
-            </div>
-            {totals.tentative > 0 && (
+            <div className="flex items-center justify-between gap-2">
               <div>
-                {totals.tentative} tentative serving{totals.tentative === 1 ? '' : 's'} — buying for them never
-                schedules them to cook.
+                <div>
+                  Shopping: {totals.shopping} servings
+                  {totals.tentativeShopped ? ` (includes ${totals.tentativeShopped} tentative)` : ''}.
+                </div>
+                {totals.tentative > 0 && (
+                  <div className="text-[11px] text-ink-2 mt-0.5">
+                    {totals.tentative} tentative serving{totals.tentative === 1 ? '' : 's'} — buying for them never
+                    schedules them to cook.
+                  </div>
+                )}
               </div>
-            )}
+              <Button variant="outline" className="!py-1 !px-2.5 text-xs flex-shrink-0" onClick={() => nav('/shopping')}>
+                View list →
+              </Button>
+            </div>
           </Banner>
         </>
       )}

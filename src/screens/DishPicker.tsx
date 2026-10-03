@@ -1,6 +1,8 @@
 import React, { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { SAMPLE_RECIPES } from '../data/recipes';
 import { modeOf, readyOf, servesOf } from '../lib/inheritance';
+import { useWeekStore } from '../store/useWeekStore';
 import { Stepper } from '../components/ui';
 import type { Group, RecipeItem, Slot, SlotCategory } from '../types';
 import { ALL_CATEGORIES } from '../types';
@@ -41,6 +43,9 @@ export default function DishPicker({
   const initialCategory = slot.category ?? 'All';
   const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory);
   const [searchQuery, setSearchQuery] = useState('');
+  const nav = useNavigate();
+  const { state } = useWeekStore();
+  const recipes = state.recipes && state.recipes.length > 0 ? state.recipes : SAMPLE_RECIPES;
 
   // 2. Track inline expanded recipe IDs (Screen 07)
   const [expandedRecipeIds, setExpandedRecipeIds] = useState<Record<string, boolean>>({});
@@ -54,7 +59,7 @@ export default function DishPicker({
   // 4. Currently saved dish in this slot (if editing a saved slot — Screen 19)
   const currentDish = useMemo(() => {
     if (!slot.dishId && !slot.dishName) return null;
-    return SAMPLE_RECIPES.find((r) => r.id === slot.dishId || r.name === slot.dishName) ?? {
+    return recipes.find((r) => r.id === slot.dishId || r.name === slot.dishName) ?? {
       id: slot.dishId || 'custom',
       name: slot.dishName || 'Custom dish',
       category: slot.category ?? 'Quick & light',
@@ -66,21 +71,21 @@ export default function DishPicker({
       steps: [],
       note: 'Saved in slot',
     } as RecipeItem;
-  }, [slot.dishId, slot.dishName, slot.category, slot.minutes, slot.base]);
+  }, [recipes, slot.dishId, slot.dishName, slot.category, slot.minutes, slot.base]);
 
   // 5. Category counts for pill badges
   const categoryCounts = useMemo(() => {
     const counts: Record<string, number> = {};
-    for (const r of SAMPLE_RECIPES) {
+    for (const r of recipes) {
       counts[r.category] = (counts[r.category] || 0) + 1;
     }
     return counts;
-  }, []);
+  }, [recipes]);
 
   // 6. Filter recipes by category and search query
   const filteredRecipes = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    return SAMPLE_RECIPES.filter((r) => {
+    return recipes.filter((r) => {
       // Category filter
       if (selectedCategory !== 'All' && r.category !== selectedCategory) {
         return false;
@@ -90,12 +95,14 @@ export default function DishPicker({
         const inName = r.name.toLowerCase().includes(q);
         const inNote = Boolean(r.note && r.note.toLowerCase().includes(q));
         const inBase = Boolean(r.base && r.base.toLowerCase().includes(q));
-        const inIng = r.ingredients.some((ing) => ing.toLowerCase().includes(q));
+        const inIng = r.ingredients.some((ing) =>
+          (typeof ing === 'string' ? ing : ing.name).toLowerCase().includes(q),
+        );
         if (!inName && !inNote && !inBase && !inIng) return false;
       }
       return true;
     });
-  }, [selectedCategory, searchQuery]);
+  }, [recipes, selectedCategory, searchQuery]);
 
   const toggleExpand = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -240,7 +247,7 @@ export default function DishPicker({
                   <div className="mt-1 flex flex-wrap gap-1">
                     {currentDish.ingredients.map((ing, idx) => (
                       <span key={idx} className="rounded bg-white border border-line px-2 py-0.5 text-ink">
-                        {ing}
+                        {typeof ing === 'string' ? ing : ing.name}
                       </span>
                     ))}
                   </div>
@@ -263,6 +270,16 @@ export default function DishPicker({
                       <b className="text-ink">Night before:</b> {currentDish.nightBeforePrep}
                     </div>
                   )}
+
+                  <div className="mt-2.5 pt-2 border-t border-line flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => nav(`/recipes/${currentDish.id}`)}
+                      className="rounded-lg border border-line-2 bg-white px-2.5 py-1 text-xs font-semibold text-ink hover:bg-surface-2 cursor-pointer flex items-center gap-1"
+                    >
+                      Edit recipe ✎
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -417,7 +434,7 @@ export default function DishPicker({
                       <div className="mt-1 flex flex-wrap gap-1">
                         {recipe.ingredients.map((ing, idx) => (
                           <span key={idx} className="rounded bg-white border border-line px-2 py-0.5 text-ink text-[11.5px]">
-                            {ing}
+                            {typeof ing === 'string' ? ing : ing.name}
                           </span>
                         ))}
                       </div>
@@ -451,7 +468,17 @@ export default function DishPicker({
                       )}
 
                       {/* Action button inside expansion */}
-                      <div className="mt-3 pt-2 border-t border-line flex justify-end">
+                      <div className="mt-3 pt-2 border-t border-line flex items-center justify-between">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            nav(`/recipes/${recipe.id}`);
+                          }}
+                          className="text-[12px] font-semibold text-ink-2 hover:text-ink cursor-pointer"
+                        >
+                          Edit recipe ✎
+                        </button>
                         <button
                           type="button"
                           onClick={() => onPick(recipe)}

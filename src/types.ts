@@ -108,6 +108,8 @@ export interface AppState {
   household: number;
   routines: Routine[];
   dayInstances: Record<string, DayInstance>;
+  recipes?: RecipeItem[];
+  bases?: BaseItem[];
 }
 
 /** What a date resolves to — either a stored instance or a fresh projection. */
@@ -153,6 +155,25 @@ export interface CookPlan {
   start: number | null;
 }
 
+export interface RecipeIngredient {
+  name: string;
+  qty: number;
+  unit: string;
+  shopSection: string;
+  estimated: boolean;
+}
+
+export interface BaseItem {
+  id: string;
+  name: string;
+  kind: string;
+  leadTime: string;
+  keeps: string;
+  batchSize: string;
+  notes?: string;
+  isCustom?: boolean;
+}
+
 /** A dish in the library the picker draws from. */
 export interface RecipeItem {
   id: string;
@@ -160,7 +181,7 @@ export interface RecipeItem {
   category: SlotCategory;
   prepTime: string;
   cookTime: string;
-  ingredients: string[];
+  ingredients: RecipeIngredient[];
   steps: string[];
   nightBeforePrep?: string;
   /** "Cook extra rice for the office lunch box" — the shared-prep hint. */
@@ -170,4 +191,5 @@ export interface RecipeItem {
   note?: string;
   /** Warning badge shown only when slot's effective mode is 'pack'. */
   travelsSoSo?: boolean;
+  servesDefault?: number;
 }

@@ -1,11 +1,139 @@
-import type { RecipeItem } from '../types';
+import type { RecipeIngredient, RecipeItem } from '../types';
 
-/* The dish library the picker (N5) draws from.
-   The old SLOT_METADATA table lived here too — it hardcoded schoolBreak1,
-   officeLunch and a 'school' | 'office' | 'home' section per slot. The routine
-   model replaces it: a slot now carries its own name, time and category. */
+export function toStructuredIngredients(rawList: (string | RecipeIngredient)[]): RecipeIngredient[] {
+  return rawList.map((item) => {
+    if (typeof item === 'object' && item !== null && 'name' in item) {
+      return item;
+    }
+    const raw = String(item);
+    const lower = raw.toLowerCase().trim();
+    let qty = 50;
+    let unit = 'g';
+    let shopSection = 'Pantry';
 
-export const SAMPLE_RECIPES: RecipeItem[] = [
+    if (/paneer/i.test(lower)) {
+      qty = 150;
+      unit = 'g';
+      shopSection = 'Dairy';
+    } else if (/onion/i.test(lower)) {
+      qty = 150;
+      unit = 'g';
+      shopSection = 'Veg';
+    } else if (/tomato/i.test(lower)) {
+      qty = 135;
+      unit = 'g';
+      shopSection = 'Veg';
+    } else if (/potato|aloo/i.test(lower)) {
+      qty = 180;
+      unit = 'g';
+      shopSection = 'Veg';
+    } else if (/bhindi|okra/i.test(lower)) {
+      qty = 180;
+      unit = 'g';
+      shopSection = 'Veg';
+    } else if (/cucumber/i.test(lower)) {
+      qty = 120;
+      unit = 'g';
+      shopSection = 'Veg';
+    } else if (/rice/i.test(lower)) {
+      qty = 165;
+      unit = 'g';
+      shopSection = 'Pantry';
+    } else if (/poha/i.test(lower)) {
+      qty = 120;
+      unit = 'g';
+      shopSection = 'Pantry';
+    } else if (/toor/i.test(lower)) {
+      qty = 105;
+      unit = 'g';
+      shopSection = 'Pantry';
+    } else if (/chana dal/i.test(lower)) {
+      qty = 105;
+      unit = 'g';
+      shopSection = 'Pantry';
+    } else if (/chickpea|kabuli/i.test(lower)) {
+      qty = 150;
+      unit = 'g';
+      shopSection = 'Pantry';
+    } else if (/moong/i.test(lower)) {
+      qty = 120;
+      unit = 'g';
+      shopSection = 'Pantry';
+    } else if (/flour|dough/i.test(lower)) {
+      qty = 150;
+      unit = 'g';
+      shopSection = 'Pantry';
+    } else if (/besan/i.test(lower)) {
+      qty = 105;
+      unit = 'g';
+      shopSection = 'Pantry';
+    } else if (/rava|sooji/i.test(lower)) {
+      qty = 120;
+      unit = 'g';
+      shopSection = 'Pantry';
+    } else if (/peanuts|cashew|almond/i.test(lower)) {
+      qty = 45;
+      unit = 'g';
+      shopSection = 'Pantry';
+    } else if (/makhana/i.test(lower)) {
+      qty = 60;
+      unit = 'g';
+      shopSection = 'Pantry';
+    } else if (/banana/i.test(lower)) {
+      qty = 2;
+      unit = 'count';
+      shopSection = 'Fruit';
+    } else if (/apple/i.test(lower)) {
+      qty = 2;
+      unit = 'count';
+      shopSection = 'Fruit';
+    } else if (/curd|yogurt/i.test(lower)) {
+      qty = 200;
+      unit = 'g';
+      shopSection = 'Dairy';
+    } else if (/milk/i.test(lower)) {
+      qty = 225;
+      unit = 'ml';
+      shopSection = 'Dairy';
+    } else if (/butter|ghee/i.test(lower)) {
+      qty = 45;
+      unit = 'g';
+      shopSection = 'Dairy';
+    } else if (/bread/i.test(lower)) {
+      qty = 4;
+      unit = 'slices';
+      shopSection = 'Bakery';
+    } else if (/coriander|mint|chilli|ginger|garlic|curry/i.test(lower)) {
+      qty = 30;
+      unit = 'g';
+      shopSection = 'Veg';
+    } else if (/corn/i.test(lower)) {
+      qty = 150;
+      unit = 'g';
+      shopSection = 'Veg';
+    } else if (/oil/i.test(lower)) {
+      qty = 2;
+      unit = 'tbsp';
+      shopSection = 'Pantry';
+    } else if (/masala|amchur|hing|turmeric|mustard|cumin|salt|powder/i.test(lower)) {
+      qty = 1;
+      unit = 'tsp';
+      shopSection = 'Pantry';
+    }
+
+    return {
+      name: raw,
+      qty,
+      unit,
+      shopSection,
+      estimated: true,
+    };
+  });
+}
+
+type RawRecipe = Omit<RecipeItem, 'ingredients'> & { ingredients: string[] };
+
+const RAW_SAMPLE_RECIPES: RawRecipe[] = [
   // Quick & light
   {
     id: 'r1',
@@ -374,3 +502,10 @@ export const SAMPLE_RECIPES: RecipeItem[] = [
     steps: ['Toss fresh sprouts with grated carrot, coconut, and chopped coriander', 'Temper mustard seeds, green chilli, and curry leaves in a dash of oil', 'Drizzle fresh lemon juice right before packing'],
   },
 ];
+
+export const SAMPLE_RECIPES: RecipeItem[] = RAW_SAMPLE_RECIPES.map((r) => ({
+  ...r,
+  servesDefault: 3,
+  ingredients: toStructuredIngredients(r.ingredients),
+}));
+

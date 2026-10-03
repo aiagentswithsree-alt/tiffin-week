@@ -3,6 +3,10 @@ import { NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'reac
 import Onboarding from './screens/Onboarding';
 import RoutineSetup from './screens/RoutineSetup';
 import WeekView from './screens/WeekView';
+import ShoppingList from './screens/ShoppingList';
+import PrepPlan from './screens/PrepPlan';
+import RecipeEditor from './screens/RecipeEditor';
+import BasesLibrary from './screens/BasesLibrary';
 import { findConflicts } from './lib/days';
 import { useWeekStore } from './store/useWeekStore';
 import { Button } from './components/ui';
@@ -62,6 +66,8 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         <div className="mt-2.5 flex overflow-hidden rounded-lg border border-line-2">
           {tab('/routines', 'Routines')}
           {tab('/week', 'This week')}
+          {tab('/shopping', 'Shopping')}
+          {tab('/prep', 'Prep')}
         </div>
       </header>
 
@@ -91,6 +97,10 @@ export default function App() {
         <Route path="/routines" element={<Shell><RoutineSetup /></Shell>} />
         <Route path="/week" element={<Shell><WeekView /></Shell>} />
         <Route path="/week/:date" element={<Shell><WeekView /></Shell>} />
+        <Route path="/shopping" element={<ShoppingList />} />
+        <Route path="/prep" element={<PrepPlan />} />
+        <Route path="/recipes/:id" element={<RecipeEditor />} />
+        <Route path="/bases" element={<BasesLibrary />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Frame>

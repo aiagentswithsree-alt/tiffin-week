@@ -48,6 +48,13 @@ When a dish from the library (`RecipeItem`) is picked into a slot:
 - `slot.base`: Populated from `dish.base` upon picking. Stays on the slot as the shared-prep override.
 - `slot.category`: Inherits `dish.category` if slot had none set.
 
+### Recipes and Bases as Library Items (Milestone 4)
+
+- **Recipes in persisted state:** Recipes move from the static `SAMPLE_RECIPES` constant into persisted `state.recipes`, seeded from `SAMPLE_RECIPES` on first run. Never mutate the constant.
+- **Structured ingredients:** Ingredients are structured objects: `{ name, qty, unit, shopSection, estimated }`. Existing estimates start with `estimated: true`. Typing over an amount in N10 Recipe Editor makes it real and removes the `est.` tag.
+- **Library item rule:** Unlike routines, a recipe is a **LIBRARY item**: editing it changes every day that uses that dish. Do not apply day-instance logic to recipes.
+- **Bases in persisted state:** Bases move into persisted `state.bases`, seeded from starter bases on first run. Linking a base in the recipe editor connects the dish to the prep plan.
+
 ### Six rules that are easy to break by accident
 
 1. **Template vs instance.** A routine is a template. Editing a day creates a
@@ -55,9 +62,14 @@ When a dish from the library (`RecipeItem`) is picked into a slot:
    template is a separate, explicit action. Never write an edit back to a
    routine implicitly.
 
-2. **Day offsets are independent.** `slot.timeDay` and `slot.readyByDay` are set
-   separately, so a Monday shift can eat at 00:30 Tuesday from a box packed
-   17:30 Monday. Any time arithmetic must use both.
+2. **Day offsets are independent (0 | 1 relative to ROUTINE day).** `slot.timeDay`
+   and `slot.readyByDay` are set separately, both strictly `0 | 1`. They are
+   always relative to the **routine day**, NOT the meal's eaten date.
+   Prep calendar day formula: `D_cook = D_routine + ready.day`.
+   Example: A Monday night shift eats lunch at 00:30 Tuesday (`timeDay: 1`),
+   but packs at 17:30 Monday (`readyByDay: 0`). Since `ready.day` is 0,
+   `D_cook = Monday + 0 = Monday`. Its prep task lands on Monday, not Tuesday.
+   No negative offset (`-1`) exists or is permitted in `DayOffset`.
 
 3. **The cook schedule spans every included group.** Computing per group is the
    bug that made the original fridge card print a School-only 6:42 start on a day
