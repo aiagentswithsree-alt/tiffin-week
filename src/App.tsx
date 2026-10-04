@@ -9,6 +9,8 @@ import RecipeEditor from './screens/RecipeEditor';
 import BasesLibrary from './screens/BasesLibrary';
 import Settings from './screens/Settings';
 import StartNextWeek from './screens/StartNextWeek';
+import PrintCentre from './screens/PrintCentre';
+import PrintStub from './screens/PrintStub';
 import { findConflicts } from './lib/days';
 import { useWeekStore } from './store/useWeekStore';
 import { Button } from './components/ui';
@@ -100,9 +102,26 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 export default function App() {
   const { state, ready } = useWeekStore();
+  const loc = useLocation();
   if (!ready) return <Frame><div className="p-4 text-sm text-ink-2">Loading…</div></Frame>;
 
   const configured = state.routines.length > 0;
+
+  // Print sheets render at real page dimensions (A3/A4/A5) and must escape the
+  // 390x844 phone frame. The Print centre itself (/print exact) stays inside it.
+  const isPrintSheet = /^\/print\/[a-z]+/.test(loc.pathname);
+  if (isPrintSheet) {
+    return (
+      <Routes>
+        <Route path="/print/wall" element={<PrintStub id="wall" />} />
+        <Route path="/print/prep" element={<PrintStub id="prep" />} />
+        <Route path="/print/shopping" element={<PrintStub id="shopping" />} />
+        <Route path="/print/fridge" element={<PrintStub id="fridge" />} />
+        <Route path="/print/blank" element={<PrintStub id="blank" />} />
+        <Route path="/print/recipes" element={<PrintStub id="recipes" />} />
+      </Routes>
+    );
+  }
 
   return (
     <Frame>
@@ -117,6 +136,7 @@ export default function App() {
         <Route path="/bases" element={<BasesLibrary />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/start-next-week" element={<StartNextWeek />} />
+        <Route path="/print" element={<PrintCentre />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Frame>

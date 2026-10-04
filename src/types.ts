@@ -105,7 +105,9 @@ export interface DayInstance {
 }
 
 export interface PrintDefaults {
-  paperSize: 'A4' | 'A5';
+  /** A3 is offered for the wall planner and blank planner only. Older saved
+   *  state without this field defaults to A4 at read time. */
+  paperSize: 'A3' | 'A4' | 'A5';
   orientation: 'landscape' | 'portrait';
   inkSaver: boolean;
 }

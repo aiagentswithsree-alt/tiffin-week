@@ -115,13 +115,20 @@ export default function WeekView() {
         </button>
       </div>
 
-      <div className="mt-2.5">
+      <div className="mt-2.5 grid grid-cols-2 gap-2">
         <button
           type="button"
           onClick={() => nav(`/start-next-week?srcOffset=${offset}`)}
-          className="w-full rounded-xl border border-line bg-white p-2.5 text-center text-xs font-semibold text-ink hover:bg-surface-2 cursor-pointer shadow-xs"
+          className="rounded-xl border border-line bg-white p-2.5 text-center text-xs font-semibold text-ink hover:bg-surface-2 cursor-pointer shadow-xs"
         >
-          Start a new week (copy, shuffle, templates, blank) →
+          Start a new week →
+        </button>
+        <button
+          type="button"
+          onClick={() => nav('/print')}
+          className="rounded-xl border border-line bg-white p-2.5 text-center text-xs font-semibold text-ink hover:bg-surface-2 cursor-pointer shadow-xs"
+        >
+          Print centre →
         </button>
       </div>
     </div>
@@ -218,52 +225,6 @@ const DayPlan: React.FC<{ date: Date; onBack: () => void }> = ({ date: d, onBack
     setActiveSlot(null);
   };
 
-  // State testing helpers
-  const handleFillOne = () => {
-    for (let gi = 0; gi < plan.groups.length; gi++) {
-      if ((plan.groups[gi].status ?? 'confirmed') !== 'confirmed') continue;
-      for (let si = 0; si < plan.groups[gi].slots.length; si++) {
-        const s = plan.groups[gi].slots[si];
-        if (!s.dishId && !s.dishName) {
-          const match = recipes.find((r) => r.category === s.category) ?? recipes[0];
-          handlePickDish(gi, si, match);
-          return;
-        }
-      }
-    }
-  };
-
-  const handleFillAll = () => {
-    onDay((groups) => {
-      let idx = 0;
-      for (const g of groups) {
-        if ((g.status ?? 'confirmed') !== 'confirmed') continue;
-        for (const s of g.slots) {
-          if (!s.dishId && !s.dishName) {
-            const match = recipes.find((r) => r.category === s.category) ?? recipes[idx % recipes.length];
-            s.dishId = match.id;
-            s.dishName = match.name;
-            s.category = match.category;
-            s.minutes = match.cookMinutes ?? (parseInt(match.cookTime, 10) || 10);
-            s.base = match.base ?? null;
-            idx++;
-          }
-        }
-      }
-    }, 'Filled all empty slots');
-  };
-
-  const handleClearAll = () => {
-    onDay((groups) => {
-      for (const g of groups) {
-        for (const s of g.slots) {
-          s.dishId = null;
-          s.dishName = null;
-        }
-      }
-    }, 'Cleared all dishes');
-  };
-
   return (
     <div className="flex-1 overflow-y-auto px-4 pb-4">
       <Button variant="quiet" onClick={onBack}>← Back to the week</Button>
@@ -290,24 +251,6 @@ const DayPlan: React.FC<{ date: Date; onBack: () => void }> = ({ date: d, onBack
       </div>
 
       <Hint>{plan.routineName ? `Routine: ${plan.routineName}` : 'No routine covers this day.'}</Hint>
-
-      {/* DEV Quick Test bar for verifying all 3 states — removable without touching any other logic (see BUILD-ORDER.md) */}
-      {Boolean(import.meta.env.DEV) && (
-        <div className="mt-2 flex items-center justify-between rounded-lg border border-dashed border-amber/40 bg-amber-soft/40 px-2 py-1.5 text-[11px] text-ink-2">
-          <span className="font-semibold text-amber">DEV test state:</span>
-          <div className="flex gap-1.5">
-            <button type="button" onClick={handleClearAll} className="rounded border border-line-2 bg-white px-2 py-0.5 font-medium hover:bg-surface-2">
-              Empty
-            </button>
-            <button type="button" onClick={handleFillOne} className="rounded border border-line-2 bg-white px-2 py-0.5 font-medium hover:bg-surface-2">
-              Partial (+1)
-            </button>
-            <button type="button" onClick={handleFillAll} className="rounded border border-line-2 bg-white px-2 py-0.5 font-medium hover:bg-surface-2">
-              Planned (All)
-            </button>
-          </div>
-        </div>
-      )}
 
       {!plan.routineId && plan.groups.length === 0 ? (
         <>

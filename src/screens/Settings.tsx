@@ -167,24 +167,18 @@ export default function Settings() {
             <div className="flex items-center justify-between text-[13px]">
               <span className="font-semibold text-ink">Paper size</span>
               <div className="flex rounded-lg border border-line p-0.5 bg-surface-2">
-                <button
-                  type="button"
-                  onClick={() => handleUpdatePrint({ paperSize: 'A4' })}
-                  className={`px-3 py-1 text-xs font-semibold rounded-md cursor-pointer ${
-                    printDefaults.paperSize === 'A4' ? 'bg-white shadow-xs text-ink' : 'text-ink-2'
-                  }`}
-                >
-                  A4
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleUpdatePrint({ paperSize: 'A5' })}
-                  className={`px-3 py-1 text-xs font-semibold rounded-md cursor-pointer ${
-                    printDefaults.paperSize === 'A5' ? 'bg-white shadow-xs text-ink' : 'text-ink-2'
-                  }`}
-                >
-                  A5
-                </button>
+                {(['A3', 'A4', 'A5'] as const).map((sz) => (
+                  <button
+                    key={sz}
+                    type="button"
+                    onClick={() => handleUpdatePrint({ paperSize: sz })}
+                    className={`px-3 py-1 text-xs font-semibold rounded-md cursor-pointer ${
+                      printDefaults.paperSize === sz ? 'bg-white shadow-xs text-ink' : 'text-ink-2'
+                    }`}
+                  >
+                    {sz}
+                  </button>
+                ))}
               </div>
             </div>
 

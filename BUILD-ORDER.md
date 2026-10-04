@@ -19,9 +19,9 @@ visual reference — they are not being redrawn.
 
 | | |
 |---|---|
-| **Done** | N1 Onboarding · N2 Routine setup · N3 Week view + day plan · N4 Day plan slot filling · N5 Dish picker · N6 Shopping list |
-| **Next** | N8 Prep plan (Milestone 3) |
-| Verified | typecheck + build clean; 11 end-to-end checks pass (milestone-2 + milestone-3-shopping); logic covered by 16 checks in the v5 wireframe |
+| **Done** | M1 Configuration layer (N1 Onboarding · N2 Routine setup · N3 Week view + day plan) · M2 Core loop (N4 Day plan slot filling · N5 Dish picker) · M3 Derived outputs (N6 Shopping list + N7 Pantry drawer · N8 Prep plan) · M4 Library (N9 Bases · N10 Recipe editor) · M5 Settings & seeding (N11 Settings · N12 Start next week) |
+| **In progress** | M6 Print — N13 Print centre and six print sheets (N14–N19) |
+| Verified | typecheck + build clean; Playwright specs for milestones 2–5 pass |
 
 Milestone 1 landed as a **port** of `routine-setup-v5.html`, not a fresh design.
 The inheritance chain, conflict resolution, day instances, attendance and the
