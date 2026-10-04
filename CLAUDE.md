@@ -5,6 +5,15 @@ shopping list, prep plan and printable sheets.
 
 Read `BUILD-ORDER.md` for what to build next and in what order.
 
+## Session protocol
+
+- **Start of every session:** read `STATE.md`, `SESSION.md` and `HANDOFF.md`
+  before planning. State the current milestone and the last thing done.
+- **Plan first, wait for "go" before coding.**
+- **End of every session:** update `STATE.md` (what's built), `SESSION.md`
+  (what this session did) and `HANDOFF.md` (next steps, open questions,
+  gotchas). Run `npm test` and record the real result.
+
 ## Stack — settled, do not change
 
 React 19 + TypeScript + Vite + Tailwind v4, routed with react-router.
@@ -94,6 +103,24 @@ When a dish from the library (`RecipeItem`) is picked into a slot:
    shopping list. Buying for a tentative meal must never schedule it to cook.
    Per-weekday `tentativeDays` is how "confirmed Mon–Wed, tentative Fri" is
    expressed without a second group.
+
+## Ponytail boundaries
+
+Ponytail (minimal-code plugin) is active. It shapes HOW code is written,
+never WHAT the project guarantees. These always win over ponytail:
+
+- The data model (Week → Day → Routine → Group[] → Slot[] → Dish),
+  `null`-inherit, and the six rules above.
+- Never weaken, delete or skip existing Playwright tests.
+- All persistence goes through `useWeekStore`. The storage adapter
+  (`load` / `save` / `subscribe`) is a required seam, not over-engineering.
+- Keep input validation, Firestore security rules, auth checks and
+  accessibility.
+- Print layouts (`@page`, A3/A4/A5, multi-page spill) stay as they are.
+- Don't add `@google/genai`, `express`, `esbuild` or `tsx`.
+
+Every ponytail shortcut must carry a `ponytail:` comment naming its upgrade
+path.
 
 ## Layout
 
