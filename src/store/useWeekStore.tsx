@@ -2,6 +2,7 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useR
 import { emptyState } from '../lib/model';
 import { SAMPLE_RECIPES } from '../data/recipes';
 import { DEFAULT_BASES } from '../data/bases';
+import { DEFAULT_PRINT_DEFAULTS, DEFAULT_WEEK_TEMPLATES } from '../data/templates';
 import type { AppState } from '../types';
 
 const KEY = 'tiffin-week-v1';
@@ -40,6 +41,8 @@ const read = (): AppState | null => {
       dayInstances: parsed.dayInstances ?? {},
       recipes: parsed.recipes && parsed.recipes.length > 0 ? parsed.recipes : structuredClone(SAMPLE_RECIPES),
       bases: parsed.bases && parsed.bases.length > 0 ? parsed.bases : structuredClone(DEFAULT_BASES),
+      weekTemplates: parsed.weekTemplates && parsed.weekTemplates.length > 0 ? parsed.weekTemplates : structuredClone(DEFAULT_WEEK_TEMPLATES),
+      printDefaults: parsed.printDefaults ?? structuredClone(DEFAULT_PRINT_DEFAULTS),
     };
     // If the saved payload was missing recipes or bases, write back the migrated structure
     if (!parsed.recipes || !parsed.bases || parsed.recipes.length === 0 || parsed.bases.length === 0) {

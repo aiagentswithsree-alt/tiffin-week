@@ -7,6 +7,8 @@ import ShoppingList from './screens/ShoppingList';
 import PrepPlan from './screens/PrepPlan';
 import RecipeEditor from './screens/RecipeEditor';
 import BasesLibrary from './screens/BasesLibrary';
+import Settings from './screens/Settings';
+import StartNextWeek from './screens/StartNextWeek';
 import { findConflicts } from './lib/days';
 import { useWeekStore } from './store/useWeekStore';
 import { Button } from './components/ui';
@@ -61,7 +63,19 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               {loc.pathname.startsWith('/week') ? 'This week' : 'Your routines'}
             </h1>
           </div>
-          <Button variant="quiet" onClick={() => nav('/')}>Start over</Button>
+          <div className="flex items-center gap-1.5">
+            <NavLink
+              to="/settings"
+              className={({ isActive }) =>
+                `rounded-md px-2 py-1 text-[12px] font-medium transition-colors ${
+                  isActive ? 'bg-ink font-semibold text-bg' : 'text-ink-2 hover:bg-surface-2 hover:text-ink'
+                }`
+              }
+            >
+              Settings
+            </NavLink>
+            <Button variant="quiet" onClick={() => nav('/')}>Start over</Button>
+          </div>
         </div>
         <div className="mt-2.5 flex overflow-hidden rounded-lg border border-line-2">
           {tab('/routines', 'Routines')}
@@ -101,6 +115,8 @@ export default function App() {
         <Route path="/prep" element={<PrepPlan />} />
         <Route path="/recipes/:id" element={<RecipeEditor />} />
         <Route path="/bases" element={<BasesLibrary />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/start-next-week" element={<StartNextWeek />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Frame>

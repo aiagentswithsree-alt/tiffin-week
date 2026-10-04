@@ -55,6 +55,11 @@ When a dish from the library (`RecipeItem`) is picked into a slot:
 - **Library item rule:** Unlike routines, a recipe is a **LIBRARY item**: editing it changes every day that uses that dish. Do not apply day-instance logic to recipes.
 - **Bases in persisted state:** Bases move into persisted `state.bases`, seeded from starter bases on first run. Linking a base in the recipe editor connects the dish to the prep plan.
 
+### Week Templates vs Routine Templates (Milestone 5)
+
+- **Routine template:** A routine (`Routine`) shapes **one day's structure** — its groups, slots, times, pack deadlines and default attendance. It is assigned to weekdays (0..4 for Regular, 5..6 for Weekend) or a specific date. Routines define the skeleton of a day.
+- **Week template:** A week template (`WeekTemplate`) holds a **whole week of picks** across all 7 days (0..6). When starting next week from a saved week template ("Busy week", "Exam week", "Festival week", or custom user template), it applies every dish pick across the full week at once. It does not replace routines; it populates a week's day instances.
+
 ### Six rules that are easy to break by accident
 
 1. **Template vs instance.** A routine is a template. Editing a day creates a

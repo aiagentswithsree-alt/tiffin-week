@@ -1,6 +1,6 @@
 import { DAY_NAMES, addDays, iso, weekDates, weekdayOf } from './dates';
 import { makeGroup } from './model';
-import type { AppState, Attendance, Conflict, DayInstance, Group, ResolvedDay, Routine } from '../types';
+import type { AppState, Attendance, Conflict, DayInstance, Group, ResolvedDay, Routine, SlotCategory, WeekTemplate } from '../types';
 
 const clone = <T,>(v: T): T => structuredClone(v);
 
@@ -91,6 +91,185 @@ export const copyWeekForward = (state: AppState, offset: number): void => {
     const groups = clone(plan.groups);
     for (const g of groups) for (const s of g.slots) s.done = false;
     state.dayInstances[iso(addDays(d, 7))] = { routineId: plan.routineId, groups };
+  }
+};
+
+/**
+ * Shuffle repeats: Copy last week forward, then rotate picked dishes so no dish
+ * lands in the same weekday + slot as last week, where an alternative exists.
+ */
+export const shuffleRepeats = (state: AppState, offset: number): void => {
+  copyWeekForward(state, offset);
+
+  const targetDates = weekDates(offset).map((d) => addDays(d, 7));
+
+  interface TargetSlotEntry {
+    dateKey: string;
+    gi: number;
+    si: number;
+    originalDishName: string;
+    dish: {
+      dishId: string | null | undefined;
+      dishName: string | null | undefined;
+      category: SlotCategory | null;
+      minutes: number;
+      base: string | null;
+    };
+  }
+
+  const entries: TargetSlotEntry[] = [];
+  for (const td of targetDates) {
+    const key = iso(td);
+    const inst = state.dayInstances[key];
+    if (!inst) continue;
+    inst.groups.forEach((g, gi) => {
+      g.slots.forEach((s, si) => {
+        if (s.dishId || s.dishName) {
+          entries.push({
+            dateKey: key,
+            gi,
+            si,
+            originalDishName: s.dishName || '',
+            dish: {
+              dishId: s.dishId,
+              dishName: s.dishName,
+              category: s.category,
+              minutes: s.minutes,
+              base: s.base,
+            },
+          });
+        }
+      });
+    });
+  }
+
+  if (entries.length < 2) return;
+
+  const pool = entries.map((e) => e.dish);
+  const distinctNames = new Set(pool.map((p) => p.dishName));
+  if (distinctNames.size < 2) return;
+
+  let bestShift = 1;
+  let minClashes = pool.length + 1;
+
+  for (let shift = 1; shift < pool.length; shift++) {
+    let clashes = 0;
+    for (let i = 0; i < entries.length; i++) {
+      const candidate = pool[(i + shift) % pool.length];
+      if (candidate.dishName === entries[i].originalDishName) {
+        clashes++;
+      }
+    }
+    if (clashes < minClashes) {
+      minClashes = clashes;
+      bestShift = shift;
+    }
+    if (clashes === 0) break;
+  }
+
+  const assigned = pool.map((_, i) => ({ ...pool[(i + bestShift) % pool.length] }));
+
+  for (let i = 0; i < entries.length; i++) {
+    if (assigned[i].dishName === entries[i].originalDishName) {
+      for (let j = 0; j < entries.length; j++) {
+        if (
+          i !== j &&
+          assigned[j].dishName !== entries[i].originalDishName &&
+          assigned[i].dishName !== entries[j].originalDishName
+        ) {
+          const temp = assigned[i];
+          assigned[i] = assigned[j];
+          assigned[j] = temp;
+          break;
+        }
+      }
+    }
+  }
+
+  for (let i = 0; i < entries.length; i++) {
+    const e = entries[i];
+    const newDish = assigned[i];
+    const inst = state.dayInstances[e.dateKey];
+    if (inst) {
+      const s = inst.groups[e.gi].slots[e.si];
+      s.dishId = newDish.dishId;
+      s.dishName = newDish.dishName;
+      if (newDish.category) s.category = newDish.category;
+      s.minutes = newDish.minutes;
+      s.base = newDish.base;
+    }
+  }
+};
+
+/**
+ * Start blank: Routines apply across the target week, but all dishes are cleared.
+ */
+export const startBlankWeek = (state: AppState, targetOffset: number): void => {
+  for (const d of weekDates(targetOffset)) {
+    const plan = resolveDay(state, d);
+    const groups = clone(plan.groups);
+    for (const g of groups) {
+      for (const s of g.slots) {
+        s.dishId = null;
+        s.dishName = null;
+        s.done = false;
+      }
+    }
+    state.dayInstances[iso(d)] = { routineId: plan.routineId, groups };
+  }
+};
+
+/**
+ * Save current week as a week template (Wireframe 28).
+ * Distinct from routine templates: routine templates shape 1 day;
+ * week templates hold a whole week of picks across days 0..6.
+ */
+export const saveWeekTemplate = (
+  state: AppState,
+  offset: number,
+  name: string,
+  description?: string,
+): WeekTemplate => {
+  const dates = weekDates(offset);
+  const tmpl: WeekTemplate = {
+    id: `wt-${Date.now()}`,
+    name: name.trim(),
+    description: description?.trim() || undefined,
+    days: dates.map((d) => ({
+      weekday: weekdayOf(d),
+      groups: clone(resolveDay(state, d).groups),
+    })),
+  };
+  state.weekTemplates = state.weekTemplates ?? [];
+  state.weekTemplates.push(tmpl);
+  return tmpl;
+};
+
+/**
+ * Start next week from a saved week template.
+ */
+export const applyWeekTemplate = (
+  state: AppState,
+  template: WeekTemplate,
+  targetOffset: number,
+): void => {
+  for (const d of weekDates(targetOffset)) {
+    const wd = weekdayOf(d);
+    const tmplDay = template.days.find((x) => x.weekday === wd);
+    if (tmplDay && tmplDay.groups.length > 0) {
+      const groups = clone(tmplDay.groups);
+      for (const g of groups) {
+        for (const s of g.slots) {
+          s.done = false;
+        }
+      }
+      state.dayInstances[iso(d)] = { routineId: null, groups };
+    } else {
+      const plan = resolveDay(state, d);
+      const groups = clone(plan.groups);
+      for (const g of groups) for (const s of g.slots) s.done = false;
+      state.dayInstances[iso(d)] = { routineId: plan.routineId, groups };
+    }
   }
 };
 

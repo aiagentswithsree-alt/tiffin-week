@@ -78,14 +78,19 @@ export default function WeekView() {
             Copy this week forward: meals, servings, overrides, attendance and overnight offsets move to the next
             week as independent days. Done marks reset. Routines are not touched.
           </div>
-          <Button className="mt-2" onClick={() => {
-            const p = copyWeekPreview(state, offset);
-            if (!p.planned) return;
-            if (p.clashes) { setConfirmCopy({ clashes: p.clashes }); return; }
-            update((d) => copyWeekForward(d, offset), 'Week copied forward');
-          }}>
-            Copy to next week
-          </Button>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <Button onClick={() => {
+              const p = copyWeekPreview(state, offset);
+              if (!p.planned) return;
+              if (p.clashes) { setConfirmCopy({ clashes: p.clashes }); return; }
+              update((d) => copyWeekForward(d, offset), 'Week copied forward');
+            }}>
+              Copy forward
+            </Button>
+            <Button variant="quiet" onClick={() => nav(`/start-next-week?srcOffset=${offset}`)}>
+              Start options →
+            </Button>
+          </div>
           {preview.planned === 0 && <Hint>Nothing planned in this week to copy.</Hint>}
         </Banner>
       )}
@@ -107,6 +112,16 @@ export default function WeekView() {
         >
           <span className="font-display text-[16px] font-bold">Prep plan →</span>
           <span className="text-[11px] text-ink-2">Sunday batch & nightly</span>
+        </button>
+      </div>
+
+      <div className="mt-2.5">
+        <button
+          type="button"
+          onClick={() => nav(`/start-next-week?srcOffset=${offset}`)}
+          className="w-full rounded-xl border border-line bg-white p-2.5 text-center text-xs font-semibold text-ink hover:bg-surface-2 cursor-pointer shadow-xs"
+        >
+          Start a new week (copy, shuffle, templates, blank) →
         </button>
       </div>
     </div>

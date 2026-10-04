@@ -104,12 +104,36 @@ export interface DayInstance {
   groups: Group[];
 }
 
+export interface PrintDefaults {
+  paperSize: 'A4' | 'A5';
+  orientation: 'landscape' | 'portrait';
+  inkSaver: boolean;
+}
+
+export interface WeekTemplateDay {
+  weekday: number; // 0 = Mon, 6 = Sun
+  groups: Group[];
+}
+
+/**
+ * Week template holds a whole week of picks across days 0..6 (Mon..Sun).
+ * Distinct from routine templates, which shape one day's structure.
+ */
+export interface WeekTemplate {
+  id: string;
+  name: string;
+  description?: string;
+  days: WeekTemplateDay[];
+}
+
 export interface AppState {
   household: number;
   routines: Routine[];
   dayInstances: Record<string, DayInstance>;
   recipes?: RecipeItem[];
   bases?: BaseItem[];
+  weekTemplates?: WeekTemplate[];
+  printDefaults?: PrintDefaults;
 }
 
 /** What a date resolves to — either a stored instance or a fresh projection. */

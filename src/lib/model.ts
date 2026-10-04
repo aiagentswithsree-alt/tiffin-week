@@ -93,6 +93,7 @@ export const ONBOARDING = [
 
 import { SAMPLE_RECIPES } from '../data/recipes';
 import { DEFAULT_BASES } from '../data/bases';
+import { DEFAULT_PRINT_DEFAULTS, DEFAULT_WEEK_TEMPLATES } from '../data/templates';
 
 export const seedState = (keys: string[], household = 3): AppState => {
   const weekday = makeRoutine('Regular', [0, 1, 2, 3, 4]);
@@ -107,6 +108,8 @@ export const seedState = (keys: string[], household = 3): AppState => {
     dayInstances: {},
     recipes: structuredClone(SAMPLE_RECIPES),
     bases: structuredClone(DEFAULT_BASES),
+    weekTemplates: structuredClone(DEFAULT_WEEK_TEMPLATES),
+    printDefaults: structuredClone(DEFAULT_PRINT_DEFAULTS),
   };
 };
 
@@ -116,4 +119,6 @@ export const emptyState = (): AppState => ({
   dayInstances: {},
   recipes: structuredClone(SAMPLE_RECIPES),
   bases: structuredClone(DEFAULT_BASES),
+  weekTemplates: structuredClone(DEFAULT_WEEK_TEMPLATES),
+  printDefaults: structuredClone(DEFAULT_PRINT_DEFAULTS),
 });

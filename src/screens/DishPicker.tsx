@@ -86,8 +86,8 @@ export default function DishPicker({
   const filteredRecipes = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     return recipes.filter((r) => {
-      // Category filter
-      if (selectedCategory !== 'All' && r.category !== selectedCategory) {
+      // Category filter: when not actively searching, enforce selected category tab
+      if (!q && selectedCategory !== 'All' && r.category !== selectedCategory) {
         return false;
       }
       // Search query across name, ingredients, note, base
