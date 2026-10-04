@@ -19,9 +19,9 @@ visual reference — they are not being redrawn.
 
 | | |
 |---|---|
-| **Done** | M1 Configuration layer (N1 Onboarding · N2 Routine setup · N3 Week view + day plan) · M2 Core loop (N4 Day plan slot filling · N5 Dish picker) · M3 Derived outputs (N6 Shopping list + N7 Pantry drawer · N8 Prep plan) · M4 Library (N9 Bases · N10 Recipe editor) · M5 Settings & seeding (N11 Settings · N12 Start next week) |
-| **In progress** | M6 Print — N13 Print centre and six print sheets (N14–N19) |
-| Verified | typecheck + build clean; Playwright specs for milestones 2–5 pass |
+| **Done** | M1 Configuration layer (N1 Onboarding · N2 Routine setup · N3 Week view + day plan) · M2 Core loop (N4 Day plan slot filling · N5 Dish picker) · M3 Derived outputs (N6 Shopping list + N7 Pantry drawer · N8 Prep plan) · M4 Library (N9 Bases · N10 Recipe editor) · M5 Settings & seeding (N11 Settings · N12 Start next week) · M6 Print (N13 Print centre + N14 Wall · N15 Prep · N16 Shopping · N17 Fridge · N18 Blank · N19 Recipe cards) |
+| **Next** | No milestone outstanding. See `HANDOFF.md` for remaining non-feature work. |
+| Verified | typecheck + build clean; 46/46 Playwright specs pass (33 pre-M6 + 13 M6) |
 
 Milestone 1 landed as a **port** of `routine-setup-v5.html`, not a fresh design.
 The inheritance chain, conflict resolution, day instances, attendance and the
@@ -113,14 +113,22 @@ Settings loses days, groups and timings to N2; it keeps household, pantry, bases
 and print defaults, and links out. Screen 28's *copy last week* is built;
 *shuffle repeats* and *start from a saved template* are not.
 
-## Milestone 6 — Print
+## Milestone 6 — Print [COMPLETED]
 
 N13 Print centre (29) · N14 Wall planner (30) · N15 Prep sheet (31) ·
 N16 Shopping list (32) · N17 Fridge card (33) · N18 Blank planner (34) ·
 N19 Recipe card (35)
 
-Row bands become generated rows. Group count is unbounded now, so **spill onto
-further sheets with repeated headings** — do not cap groups or shrink type.
+Row bands became generated rows. Group count is unbounded, so sheets **spill
+onto further pages with repeated headings** — groups never capped, type never
+shrunk. Paper is `A3 | A4 | A5`; A3 is offered for the wall and blank planner
+only. Old saved state missing the field defaults to A4.
+
+Tested via `tests/milestone-6-print.spec.ts` (13/13 passed), including the four
+required: fridge start-time ≡ Mornings-tab start-time on a 2+ group day
+(rule 3), wall planner 6-group PDF spans >1 page with heading repeated, blank
+planner row labels follow routine slot renames, and ink-saver clears every
+coloured background fill across all six sheets.
 
 ---
 

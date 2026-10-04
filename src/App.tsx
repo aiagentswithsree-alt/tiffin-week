@@ -10,7 +10,12 @@ import BasesLibrary from './screens/BasesLibrary';
 import Settings from './screens/Settings';
 import StartNextWeek from './screens/StartNextWeek';
 import PrintCentre from './screens/PrintCentre';
-import PrintStub from './screens/PrintStub';
+import PrintWall from './screens/PrintWall';
+import PrintPrep from './screens/PrintPrep';
+import PrintShopping from './screens/PrintShopping';
+import PrintFridge from './screens/PrintFridge';
+import PrintBlank from './screens/PrintBlank';
+import PrintRecipes from './screens/PrintRecipes';
 import { findConflicts } from './lib/days';
 import { useWeekStore } from './store/useWeekStore';
 import { Button } from './components/ui';
@@ -113,12 +118,12 @@ export default function App() {
   if (isPrintSheet) {
     return (
       <Routes>
-        <Route path="/print/wall" element={<PrintStub id="wall" />} />
-        <Route path="/print/prep" element={<PrintStub id="prep" />} />
-        <Route path="/print/shopping" element={<PrintStub id="shopping" />} />
-        <Route path="/print/fridge" element={<PrintStub id="fridge" />} />
-        <Route path="/print/blank" element={<PrintStub id="blank" />} />
-        <Route path="/print/recipes" element={<PrintStub id="recipes" />} />
+        <Route path="/print/wall" element={<PrintWall />} />
+        <Route path="/print/prep" element={<PrintPrep />} />
+        <Route path="/print/shopping" element={<PrintShopping />} />
+        <Route path="/print/fridge" element={<PrintFridge />} />
+        <Route path="/print/blank" element={<PrintBlank />} />
+        <Route path="/print/recipes" element={<PrintRecipes />} />
       </Routes>
     );
   }
