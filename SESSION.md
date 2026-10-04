@@ -67,3 +67,34 @@ Branch `firebase-sync`. Household sync via Firebase, signed-out behaviour unchan
   no console errors, no Firebase requests (even with a stale signed-in flag).
 - Not tested: real Google sign-in, real two-device sync, installed PWA on
   iPhone / Android — no device and no real-project calls from tests.
+
+## After the commit — live rollout
+
+Owner did the console setup and live testing; no code changed.
+
+### Console setup (done)
+- Netlify env: `VITE_FIREBASE_AUTH_DOMAIN = meal-planner-dps.netlify.app`
+  plus the other three `VITE_FIREBASE_*` vars (not marked secret — they ship
+  in the client bundle anyway).
+- Google OAuth web client: origin `https://meal-planner-dps.netlify.app` and
+  redirect URI `https://meal-planner-dps.netlify.app/__/auth/handler` added.
+- Firebase Auth: `meal-planner-dps.netlify.app` added to authorized domains.
+- `firestore.rules` published.
+
+### Deploy
+- `firebase-sync` merged to `main` at 58ee050; Netlify deployed it.
+- `https://meal-planner-dps.netlify.app/__/auth/handler` serves Firebase's
+  page, so the `_redirects` proxy works.
+
+### Live tests (passed)
+- Google sign-in on laptop and on phone.
+- Two-way live sync between them, including dish edits.
+- Offline edit arrives after reconnect — up to ~60 s on a phone, which is
+  normal (the Firestore SDK backs off reconnecting while the page is in the
+  background).
+
+### Not yet tested
+- Invite / join with a second Google account.
+
+### Tests on main after merge
+- `npm test` → **48 passed** (16.2 s), unchanged from the branch.

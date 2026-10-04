@@ -1,6 +1,6 @@
 # State
 
-As of 2026-10-04. Firebase household sync built on branch `firebase-sync` (not yet merged). M6 is on main.
+As of 2026-10-04. Firebase household sync merged to `main` at 58ee050 and live.
 Deployed: https://meal-planner-dps.netlify.app — Netlify auto-deploys from `main`.
 
 > This file is a snapshot of the code's shape. For the domain contract read
@@ -9,7 +9,7 @@ Deployed: https://meal-planner-dps.netlify.app — Netlify auto-deploys from `ma
 
 ## Branch
 
-`firebase-sync` (main is `main`).
+`main`. (`firebase-sync` merged at 58ee050.)
 
 ## What runs
 
@@ -18,6 +18,10 @@ a PWA via `vite-plugin-pwa`. One persisted store (`src/store/useWeekStore.tsx`,
 localStorage key `tiffin-week-v1`) with undo and migrating load.
 
 ## Sync (Firebase, optional)
+
+Live on Netlify and verified on a laptop and a phone: Google sign-in, two-way
+live sync, offline edits arriving after reconnect. Invite/join is built but
+not yet tested with a second Google account.
 
 - `src/store/useWeekStore.tsx` — `StorageAdapter` interface (`load` / `save` /
   `subscribe` / optional `flush`). `localAdapter` is always written; a

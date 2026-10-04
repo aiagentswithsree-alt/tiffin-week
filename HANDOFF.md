@@ -1,68 +1,20 @@
 # Handoff · 2026-10-04
 
-Firebase sync built on branch `firebase-sync`, not yet merged. Live app: https://meal-planner-dps.netlify.app (auto-deploys from `main`).
+Firebase sync merged to `main` at 58ee050 and live at
+https://meal-planner-dps.netlify.app (auto-deploys from `main`).
 
 > This is remaining work only. For spec / architecture read `CLAUDE.md`. For
 > milestone progression read `BUILD-ORDER.md`. For the current code shape read
 > `STATE.md`. For what shifted today read `SESSION.md`.
 
-## Remaining work
+## Next, in order
 
-### 1. `__dirname` → `import.meta.dirname` in `vite.config.ts` [DONE]
+### 1. Open decision — tentative-by-default vs shopping inclusion
 
-Swapped at `vite.config.ts:37`. The Vite 8 warning no longer appears on dev
-start or build. 46/46 Playwright tests still pass.
-
-### 2. Save button wording — "All changes saved" [DONE]
-
-`App.tsx` Shell now reads `canUndo` as the pending-change signal (every
-mutation already persists through `useWeekStore.update`, so `dirty` is
-vestigial here). The Save button says **Save** while a change is pending and
-**All changes saved** (disabled) otherwise. 46/46 Playwright tests still
-pass, including the existing specs that click the button after an edit.
-
-### 3. PWA deploy [DONE]
-
-Deployed at https://meal-planner-dps.netlify.app, auto-deploying from `main`.
-`public/_redirects` carries the SPA fallback and (from the sync branch) the
-`/__/auth/*` proxy.
-
-### 5. Firebase sync — finish on real devices
-
-Code, rules and signed-out tests are done (see `SESSION.md`). Before merging:
-
-1. Publish `firestore.rules` (`firebase deploy --only firestore:rules`, or
-   paste into Console → Firestore → Rules). Owner reviews the file first.
-2. Netlify env: `VITE_FIREBASE_AUTH_DOMAIN=meal-planner-dps.netlify.app` (plus
-   the other three vars), Google OAuth redirect URI
-   `https://meal-planner-dps.netlify.app/__/auth/handler`, Firebase Auth
-   authorized domain `meal-planner-dps.netlify.app`.
-3. Test on devices: installed PWA on iPhone Safari and Android Chrome — sign
-   in, edit on one, see it on the other; airplane mode edit then reconnect;
-   invite + join. First sign-in tap on iOS may be blocked (by design, see
-   SESSION decision 7) — the second tap must work.
-4. Local sign-in testing: use `http://localhost:3000`, not `127.0.0.1`
-   (Firebase authorizes `localhost` by default only).
-
-Gotchas:
-- **1 MiB document limit.** Seed state is ~60 KB; a busy day instance ~3 KB;
-  `dayInstances` are never pruned, so roughly a year of weeks reaches 1 MiB.
-  Settings warns above 800 KB. Fix: prune old `dayInstances`, or move them to
-  `households/{id}/days/{iso}`.
-- Join codes are not single-use in the rules — the client deletes the code
-  after use, but until then (≤48 h) a second person could use it.
-- Any member may rewrite `members` (remove others). Matches "members can
-  read/write"; tighten if households ever include people who shouldn't.
-- No leave-household / remove-member UI yet.
-- Tests use `127.0.0.1`; never add a test that signs in for real.
-
-### 4. Open decision — tentative-by-default vs shopping inclusion (carried
-over from `BUILD-ORDER.md`)
-
-A group tentative **by routine default** starts out of the shopping list; one
-switched to tentative **by hand** keeps its shopping inclusion. The reasoning
-in `BUILD-ORDER.md` was: silently dropping items the user had already
-committed to buying is worse than the asymmetry. The cost is that
+Carried over from `BUILD-ORDER.md`. A group tentative **by routine default**
+starts out of the shopping list; one switched to tentative **by hand** keeps
+its shopping inclusion. The reasoning was: silently dropping items the user
+had already committed to buying is worse than the asymmetry. The cost is that
 "tentative" ends up meaning two slightly different things.
 
 Settle one way:
@@ -74,26 +26,50 @@ Settle one way:
 - Expose both as explicit toggles everywhere `status` is edited and stop
   having a default coupling at all.
 
-No code change is urgent; this is a product call. Whoever picks it should
-grep for `g.shop` and `defaultStatus` to see the two sites that implement
-the current coupling.
+This is a product call, not a code task. Whoever picks it should grep for
+`g.shop` and `defaultStatus` to see the two sites that implement the current
+coupling.
 
-## Not open
+### 2. UI redesign with Claude Design
 
-- No new npm dependencies for M6. If you were considering adding a PDF
-  parser for test (b), the regex over `/Type /Page` already works and is
-  what the current test uses.
-- No wireframes were edited this session, per the task constraint.
-- No existing test was weakened or edited. 33 pre-existing specs still
-  pass unchanged; 13 M6 specs were added alongside.
+Not started. Constraints that still hold (see `CLAUDE.md`): design tokens stay
+Tailwind v4 `@theme` entries in `src/index.css`; print layouts (`@page`,
+A3/A4/A5, multi-page spill) stay as they are; no existing Playwright test may
+be weakened — selectors the specs rely on (roles, labels, `data-testid`s such
+as `household-count`, `sync-section`) must survive the redesign.
 
-## Suggested first commit from this state
+### 3. Invite / join test with a second Google account
 
-Two commits read cleanly if you want to separate them:
+Built and rules-checked on the emulator (25/25), not yet tried live. Steps:
 
-1. The six print sheets, the test file, the final App wiring, and the stub
-   deletion — "M6: six print sheets, routes, and tests".
-2. The three handoff docs — "docs: STATE / SESSION / HANDOFF for 2026-10-04".
+1. Account A: Settings → **Get a join code**.
+2. Account B (another device or browser profile): sign in, enter the code,
+   **Join**. B's plan should be replaced by the household's.
+3. Edit on A, see it on B, and the other way round.
+4. Reuse the same code from a third account → should fail (code deleted
+   after use). An expired or mistyped code → "wrong or has expired".
 
-Or one lump — "M6 complete" — if the branch is going to merge straight to
-`main` as a single PR.
+## Firebase gotchas
+
+- **1 MiB document limit.** Seed state is ~60 KB; a busy day instance ~3 KB;
+  `dayInstances` are never pruned, so roughly a year of weeks reaches 1 MiB.
+  Settings warns above 800 KB. Fix: prune old `dayInstances`, or move them to
+  `households/{id}/days/{iso}`.
+- Join codes are not single-use in the rules — the client deletes the code
+  after use, but until then (≤48 h) a second person could use it.
+- Any member may rewrite `members` (remove others). Matches "members can
+  read/write"; tighten if households ever include people who shouldn't.
+- No leave-household / remove-member UI yet.
+- First sign-in tap on iOS may be popup-blocked (SDK is still downloading);
+  the second tap works. See `SESSION.md` decision 7.
+- Offline edits can take ~60 s to arrive after a phone reconnects. Normal.
+- Local sign-in testing: use `http://localhost:3000`, not `127.0.0.1`
+  (Firebase authorizes `localhost` by default only).
+- Tests use `127.0.0.1`; never add a test that signs in for real.
+
+## Done
+
+- `import.meta.dirname` in `vite.config.ts`; Save button wording.
+- PWA deploy on Netlify, auto-deploying from `main`.
+- Firebase household sync: console setup, rules published, merged, live,
+  sign-in and two-way sync verified on laptop and phone.
