@@ -31,6 +31,11 @@ const Frame: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 
 const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { state, message, canUndo, undo, save, setMessage } = useWeekStore();
+  // Every mutation already persists through useWeekStore.update(); `canUndo`
+  // reflects whether a change since the last explicit Save still has an undo
+  // snapshot. With no pending change, the button says "All changes saved"
+  // and is disabled.
+  const hasPending = canUndo;
   const nav = useNavigate();
   const loc = useLocation();
 
@@ -95,7 +100,14 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       {children}
 
       <div className="flex-shrink-0 border-t border-line bg-bg px-4 py-3">
-        <Button variant="primary" className="w-full" onClick={onSave}>Save</Button>
+        <Button
+          variant="primary"
+          className="w-full disabled:cursor-not-allowed disabled:opacity-60"
+          onClick={onSave}
+          disabled={!hasPending}
+        >
+          {hasPending ? 'Save' : 'All changes saved'}
+        </Button>
         <div role="status" aria-live="polite" className="mt-2 min-h-4 text-center text-[11.5px] text-ink-2">
           {message}
           {canUndo && <button type="button" onClick={undo} className="ml-1.5 border-0 bg-transparent px-1.5 font-semibold text-green">Undo</button>}

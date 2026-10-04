@@ -105,13 +105,14 @@ N10 Recipe editor (26) · N9 Bases library (25) (N7 Pantry absorbed into N6)
 
 Tested via `tests/milestone-4-library.spec.ts` (5/5 passed).
 
-## Milestone 5 — Settings and seeding
+## Milestone 5 — Settings and seeding [COMPLETED]
 
 N11 Settings (rest of 27) · N12 Start next week (28)
 
 Settings loses days, groups and timings to N2; it keeps household, pantry, bases
-and print defaults, and links out. Screen 28's *copy last week* is built;
-*shuffle repeats* and *start from a saved template* are not.
+and print defaults, and links out. Screen 28's four start modes — *copy last
+week*, *shuffle repeats*, *start from a saved template* and *start blank* — are
+all built, covered by `tests/milestone-5.spec.ts` (5/5 passed).
 
 ## Milestone 6 — Print [COMPLETED]
 
