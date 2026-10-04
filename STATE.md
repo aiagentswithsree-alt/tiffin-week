@@ -1,6 +1,7 @@
 # State
 
-As of 2026-10-04. M6 committed on branch milestone-6-print and merged to main (built on c6f2d80).
+As of 2026-10-04. Firebase household sync built on branch `firebase-sync` (not yet merged). M6 is on main.
+Deployed: https://meal-planner-dps.netlify.app — Netlify auto-deploys from `main`.
 
 > This file is a snapshot of the code's shape. For the domain contract read
 > `CLAUDE.md` (SPEC/ARCHITECTURE). For milestone progression read
@@ -8,13 +9,36 @@ As of 2026-10-04. M6 committed on branch milestone-6-print and merged to main (b
 
 ## Branch
 
-`milestone-6-print` (main is `main`).
+`firebase-sync` (main is `main`).
 
 ## What runs
 
 Vite + React 19 + TypeScript + Tailwind v4, routed with react-router. Build is
 a PWA via `vite-plugin-pwa`. One persisted store (`src/store/useWeekStore.tsx`,
 localStorage key `tiffin-week-v1`) with undo and migrating load.
+
+## Sync (Firebase, optional)
+
+- `src/store/useWeekStore.tsx` — `StorageAdapter` interface (`load` / `save` /
+  `subscribe` / optional `flush`). `localAdapter` is always written; a
+  household adapter is added on top while signed in. Exposes `sync` on the
+  store (email, householdId, conflict, signIn/signOut/keep/invite/join).
+- `src/store/cloud.ts` — the ONLY file importing `firebase`. Dynamic import,
+  loaded only on a "Sign in with Google" tap or when the
+  `tiffin-week-signed-in` localStorage flag is set. Firestore offline cache
+  (`persistentLocalCache`, multi-tab), `ignoreUndefinedProperties`.
+- `src/lib/syncQueue.ts` — backend-free debounced last-write-wins queue:
+  `writerId` echo skip, holds remote snapshots while a save is pending, `rev`
+  counts past held snapshots.
+- Firestore: `households/{id} = { members, state, updatedAt, writerId, rev }`,
+  `users/{uid} = { householdId, joinCode? }`,
+  `joinCodes/{code} = { householdId, createdBy, expiresAt }`.
+  Rules in `firestore.rules`.
+- Missing `VITE_FIREBASE_*` vars → `sync.configured` false, local-only.
+- PWA: Firebase chunk (`cloud-*.js`, ~612 kB) is excluded from precache and
+  runtime-cached on first use. `/__/auth/*` is proxied to
+  `tiffin-week.firebaseapp.com` (`public/_redirects`) and excluded from the
+  SW navigate fallback.
 
 ## Screens
 
@@ -27,7 +51,7 @@ localStorage key `tiffin-week-v1`) with undo and migrating load.
 | `/prep` | `PrepPlan.tsx` | N8 prep plan |
 | `/recipes/:id` | `RecipeEditor.tsx` | N10 recipe editor |
 | `/bases` | `BasesLibrary.tsx` | N9 bases library |
-| `/settings` | `Settings.tsx` | N11 settings (household, pantry, print defaults) |
+| `/settings` | `Settings.tsx` | N11 settings (sync & household, household size, pantry, print defaults) |
 | `/start-next-week` | `StartNextWeek.tsx` | N12 copy/shuffle/template/blank |
 | `/print` | `PrintCentre.tsx` | N13 print centre |
 | `/print/wall` | `PrintWall.tsx` | N14 wall planner (A4/A3 landscape) |
@@ -81,7 +105,6 @@ missing `paperSize` falls through to A4 at read time (no migration needed).
 - The DEV test state bar in `WeekView.tsx` (`handleFillOne`, `handleFillAll`,
   `handleClearAll` and the surrounding `import.meta.env.DEV` block).
 
-## Not a dependency change
+## Dependencies
 
-M6 added no new npm dependencies. Playwright, React, Vite, Tailwind, and
-react-router were already in place.
+`firebase` (^12) added for sync — the only dependency added since M6.

@@ -31,6 +31,19 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
+        // Google sign-in returns to /__/auth/handler (proxied to Firebase in
+        // public/_redirects). The SPA fallback must not answer it with index.html.
+        navigateFallbackDenylist: [/^\/__\//],
+        // The Firebase chunk is only for signed-in users: not precached, so
+        // signed-out installs never download it; cached on first use for offline.
+        globIgnores: ['**/cloud-*.js'],
+        runtimeCaching: [
+          {
+            urlPattern: /\/assets\/cloud-[^/]+\.js$/,
+            handler: 'CacheFirst',
+            options: { cacheName: 'firebase-sdk', expiration: { maxEntries: 2 } },
+          },
+        ],
       },
     }),
   ],

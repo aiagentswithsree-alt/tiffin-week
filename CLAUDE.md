@@ -133,7 +133,10 @@ src/
     inheritance.ts      modeOf, servesOf, readyOf, leadText, parseServes
     schedule.ts         cookPlan (sequential, shared-prep merge), dayTotals
     days.ts             resolveDay, materialise, copyWeekForward, conflicts
-  store/useWeekStore    one persisted store; update(draft => …) + undo
+    syncQueue.ts        debounced last-write-wins queue (no backend imports)
+  store/useWeekStore    one persisted store; update(draft => …) + undo;
+                        StorageAdapter seam (local always, cloud when signed in)
+  store/cloud.ts        the ONLY Firebase import; lazy-loaded on sign-in
   screens/              one screen per file
   components/ui.tsx     shared primitives
 ```

@@ -1,0 +1,51 @@
+rules_version = '2';
+
+// Tiffin Week — one document per household holds the whole plan.
+// Deploy: firebase deploy --only firestore:rules
+service cloud.firestore {
+  match /databases/{db}/documents {
+    function signedIn() { return request.auth != null; }
+    function uid() { return request.auth.uid; }
+    function isMember(hid) {
+      return uid() in get(/databases/$(db)/documents/households/$(hid)).data.members;
+    }
+
+    // Joining: the joiner writes { householdId, joinCode } to their own users
+    // doc in the SAME batch as the members update. Rules take no parameters,
+    // so getAfter() is how the code reaches this check.
+    function validJoinCode(hid) {
+      let code = getAfter(/databases/$(db)/documents/users/$(uid())).data.joinCode;
+      let jc = get(/databases/$(db)/documents/joinCodes/$(code));
+      return jc.data.householdId == hid && jc.data.expiresAt > request.time;
+    }
+
+    match /households/{hid} {
+      allow read, delete: if signedIn() && uid() in resource.data.members;
+      allow create: if signedIn() && request.resource.data.members == [uid()];
+      allow update: if signedIn() && (
+        uid() in resource.data.members
+        || (
+          // A non-member may only add their own uid to members, nothing else.
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members'])
+          && request.resource.data.members.size() == resource.data.members.size() + 1
+          && request.resource.data.members.toSet() == resource.data.members.toSet().union([uid()].toSet())
+          && validJoinCode(hid)
+        )
+      );
+    }
+
+    match /joinCodes/{code} {
+      allow get: if signedIn();
+      // 49h, not 48h: the client sets now + 48h and its clock may run ahead.
+      allow create: if signedIn()
+        && request.resource.data.createdBy == uid()
+        && isMember(request.resource.data.householdId)
+        && request.resource.data.expiresAt <= request.time + duration.value(49, 'h');
+      allow delete: if signedIn() && isMember(resource.data.householdId);
+    }
+
+    match /users/{u} {
+      allow read, write: if signedIn() && uid() == u;
+    }
+  }
+}

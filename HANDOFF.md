@@ -1,6 +1,6 @@
 # Handoff · 2026-10-04
 
-M6 committed on branch milestone-6-print and merged to main (built on c6f2d80).
+Firebase sync built on branch `firebase-sync`, not yet merged. Live app: https://meal-planner-dps.netlify.app (auto-deploys from `main`).
 
 > This is remaining work only. For spec / architecture read `CLAUDE.md`. For
 > milestone progression read `BUILD-ORDER.md`. For the current code shape read
@@ -21,15 +21,40 @@ vestigial here). The Save button says **Save** while a change is pending and
 **All changes saved** (disabled) otherwise. 46/46 Playwright tests still
 pass, including the existing specs that click the button after an edit.
 
-### 3. PWA deploy
+### 3. PWA deploy [DONE]
 
-`vite-plugin-pwa` is configured and the build produces `dist/sw.js` plus an
-11-entry precache manifest, but the app has never been deployed. Static hosts
-that work out of the box: Netlify, Vercel, Cloudflare Pages, GitHub Pages.
-Pick one, point it at `dist/`, confirm the service worker registers on
-HTTPS, add the site icon, and the install prompt starts firing on Android /
-Chromium desktops. iOS Safari takes "Add to Home Screen" from the share menu;
-no extra work.
+Deployed at https://meal-planner-dps.netlify.app, auto-deploying from `main`.
+`public/_redirects` carries the SPA fallback and (from the sync branch) the
+`/__/auth/*` proxy.
+
+### 5. Firebase sync — finish on real devices
+
+Code, rules and signed-out tests are done (see `SESSION.md`). Before merging:
+
+1. Publish `firestore.rules` (`firebase deploy --only firestore:rules`, or
+   paste into Console → Firestore → Rules). Owner reviews the file first.
+2. Netlify env: `VITE_FIREBASE_AUTH_DOMAIN=meal-planner-dps.netlify.app` (plus
+   the other three vars), Google OAuth redirect URI
+   `https://meal-planner-dps.netlify.app/__/auth/handler`, Firebase Auth
+   authorized domain `meal-planner-dps.netlify.app`.
+3. Test on devices: installed PWA on iPhone Safari and Android Chrome — sign
+   in, edit on one, see it on the other; airplane mode edit then reconnect;
+   invite + join. First sign-in tap on iOS may be blocked (by design, see
+   SESSION decision 7) — the second tap must work.
+4. Local sign-in testing: use `http://localhost:3000`, not `127.0.0.1`
+   (Firebase authorizes `localhost` by default only).
+
+Gotchas:
+- **1 MiB document limit.** Seed state is ~60 KB; a busy day instance ~3 KB;
+  `dayInstances` are never pruned, so roughly a year of weeks reaches 1 MiB.
+  Settings warns above 800 KB. Fix: prune old `dayInstances`, or move them to
+  `households/{id}/days/{iso}`.
+- Join codes are not single-use in the rules — the client deletes the code
+  after use, but until then (≤48 h) a second person could use it.
+- Any member may rewrite `members` (remove others). Matches "members can
+  read/write"; tighten if households ever include people who shouldn't.
+- No leave-household / remove-member UI yet.
+- Tests use `127.0.0.1`; never add a test that signs in for real.
 
 ### 4. Open decision — tentative-by-default vs shopping inclusion (carried
 over from `BUILD-ORDER.md`)

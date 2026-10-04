@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useWeekStore } from '../store/useWeekStore';
 import { DEFAULT_PRINT_DEFAULTS } from '../data/templates';
@@ -61,6 +61,8 @@ export default function Settings() {
 
       {/* Settings Form Body */}
       <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4">
+        <SyncSection />
+
         {/* Section 1: Household */}
         <div className="space-y-1.5">
           <span className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-ink-2">
@@ -225,6 +227,148 @@ export default function Settings() {
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+const sectionLabel = 'text-[10.5px] font-semibold uppercase tracking-[0.1em] text-ink-2';
+const button =
+  'rounded-lg border border-line px-3 py-1.5 text-[12px] font-semibold text-ink hover:bg-surface-2 cursor-pointer disabled:opacity-50';
+
+/** Google sign-in, the household join code, and the which-plan choice. */
+function SyncSection() {
+  const { state, sync } = useWeekStore();
+  const [code, setCode] = useState('');
+  const [joinCode, setJoinCode] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState('');
+
+  const run = async (fn: () => Promise<void>) => {
+    setBusy(true);
+    setNote('');
+    try {
+      await fn();
+    } catch (e) {
+      setNote((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  // Firestore caps a document at 1 MiB; the whole plan is one document.
+  const sizeKB = sync.email ? Math.round(JSON.stringify(state).length / 1024) : 0;
+
+  return (
+    <div className="space-y-1.5">
+      <span className={sectionLabel}>SYNC &amp; HOUSEHOLD</span>
+      <div className="rounded-[12px] border border-line bg-white p-3 shadow-xs space-y-3" data-testid="sync-section">
+        {!sync.configured ? (
+          <p className="text-[12.5px] text-ink-2">Sync isn't set up on this build. Your plan is saved on this device.</p>
+        ) : !sync.email ? (
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex flex-col">
+              <span className="text-[14px] font-semibold text-ink">Same plan on every device</span>
+              <span className="text-[12px] text-ink-2">Saved on this device only until you sign in</span>
+            </div>
+            <button type="button" onClick={sync.signIn} className={button}>
+              Sign in with Google
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex min-w-0 flex-col">
+                <span className="text-[12px] text-ink-2">Signed in as</span>
+                <span className="truncate text-[14px] font-semibold text-ink" data-testid="sync-email">
+                  {sync.email}
+                </span>
+              </div>
+              <button type="button" onClick={sync.signOut} className={button}>
+                Sign out
+              </button>
+            </div>
+
+            {sync.conflict && (
+              <div role="alert" className="rounded-lg border border-amber bg-amber-soft p-2.5 space-y-2">
+                <p className="text-[12.5px] text-ink">
+                  This device and your household both have a plan, and they differ. Which one do you want to keep?
+                  The other is replaced everywhere.
+                </p>
+                <div className="flex gap-2">
+                  <button type="button" onClick={() => sync.keep('device')} className={button}>
+                    Keep this device's plan
+                  </button>
+                  <button type="button" onClick={() => sync.keep('household')} className={button}>
+                    Keep household plan
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {!sync.conflict && sync.householdId && (
+              <div className="space-y-2 border-t border-line/60 pt-2.5">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex flex-col">
+                    <span className="text-[13px] font-semibold text-ink">Invite someone</span>
+                    <span className="text-[11.5px] text-ink-2">Code works once, for 48 hours</span>
+                  </div>
+                  {code ? (
+                    <span className="font-display text-[18px] font-bold tracking-[0.15em] tabular-nums" data-testid="join-code">
+                      {code.slice(0, 4)}-{code.slice(4)}
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => run(async () => setCode(await sync.invite()))}
+                      className={button}
+                    >
+                      Get a join code
+                    </button>
+                  )}
+                </div>
+                <form
+                  className="flex items-end gap-2 border-t border-line/60 pt-2.5"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    void run(async () => {
+                      await sync.join(joinCode);
+                      setJoinCode('');
+                      setNote('Joined. You now share the household plan.');
+                    });
+                  }}
+                >
+                  <label className="flex flex-1 flex-col gap-1 text-[12px] text-ink-2">
+                    Join a household — replaces this device's plan with theirs
+                    <input
+                      value={joinCode}
+                      onChange={(e) => setJoinCode(e.target.value)}
+                      placeholder="ABCD-2345"
+                      autoCapitalize="characters"
+                      autoComplete="off"
+                      className="rounded-lg border border-line px-2.5 py-1.5 text-[14px] text-ink uppercase tracking-[0.1em]"
+                    />
+                  </label>
+                  <button type="submit" disabled={busy || !joinCode.trim()} className={button}>
+                    Join
+                  </button>
+                </form>
+              </div>
+            )}
+
+            {sizeKB > 800 && (
+              <p role="alert" className="text-[12px] text-amber">
+                Your plan is {sizeKB} KB; household sync stops working at 1024 KB. Old days will need clearing out.
+              </p>
+            )}
+          </>
+        )}
+        {(sync.error || note) && (
+          <p aria-live="polite" className="text-[12px] text-ink-2">
+            {sync.error || note}
+          </p>
+        )}
       </div>
     </div>
   );
